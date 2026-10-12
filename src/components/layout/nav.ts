@@ -1,21 +1,21 @@
 import type { IconType } from "react-icons";
-import { LuFileText, LuFolderKanban, LuInbox, LuLayers, LuLayoutDashboard } from "react-icons/lu";
+import { LuHouse } from "react-icons/lu";
 
 export type NavItem = {
   href: string;
   label: string;
   icon: IconType;
-  /** Só fica ativo na rota exata (usado na Visão geral). */
+  /** Só fica ativo na rota exata. */
   exact?: boolean;
 };
 
-export const NAV_ITEMS: NavItem[] = [
-  { href: "/admin", label: "Visão geral", icon: LuLayoutDashboard, exact: true },
-  { href: "/admin/leads", label: "Leads", icon: LuInbox },
-  { href: "/admin/projetos", label: "Projetos", icon: LuFolderKanban },
-  { href: "/admin/servicos", label: "Serviços", icon: LuLayers },
-  { href: "/admin/conteudo", label: "Conteúdo do site", icon: LuFileText },
-];
+/**
+ * Nesta versão o painel tem um único módulo: o editor da página inicial (RF15, RF18).
+ * Novos módulos entram aqui quando o back-end tiver as rotas.
+ */
+export const NAV_ITEMS: NavItem[] = [{ href: "/admin/pagina-inicial", label: "Página inicial", icon: LuHouse }];
+
+export const HOME_EDITOR_PATH = "/admin/pagina-inicial";
 
 export function isNavItemActive(item: NavItem, pathname: string): boolean {
   if (item.exact) return pathname === item.href;
@@ -24,6 +24,5 @@ export function isNavItemActive(item: NavItem, pathname: string): boolean {
 
 /** Título mostrado no cabeçalho de cada página. */
 export function pageTitleFor(pathname: string): string {
-  if (/^\/admin\/leads\/[^/]+$/.test(pathname)) return "Detalhe do lead";
   return NAV_ITEMS.find((item) => isNavItemActive(item, pathname))?.label ?? "Painel";
 }

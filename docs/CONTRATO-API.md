@@ -5,12 +5,13 @@ Back-end: **metaverso-back** (Laravel 12, Sanctum, MySQL). As rotas ficam na rai
 | Parte | Situação |
 | --- | --- |
 | Autenticação (`/login`, `/me`, `/logout`) | **confirmada** no código do back-end e integrada na v0.1.1 |
-| Leads, serviços, projetos e conteúdo do site | **ainda não existem** no back-end; o painel usa o mock (`MOCK_RESOURCES`) no formato proposto abaixo |
+| Conteúdo da página inicial (`/site-content`) | **ainda não existe** no back-end; o painel usa o mock (`MOCK_RESOURCES=site-content`) no formato proposto abaixo |
 
 Onde ajustar se algo mudar:
 
-- nomes de rota e parâmetros: `src/features/*/api.ts` e `src/lib/server/auth.ts`
-- nomes de campos: `src/lib/api/mappers.ts`
+- nomes de rota: `src/features/home-editor/api.ts` e `src/lib/server/auth.ts`
+- seções e campos: `src/features/home-editor/schema.ts` e `types.ts`
+- campos do usuário: `src/lib/api/mappers.ts`
 - recursos liberados na ponte: `src/lib/server/allowed-resources.ts`
 
 O navegador não chama estas rotas diretamente. Quem chama é o servidor do Next.js (BFF), com o token no cabeçalho `Authorization: Bearer <token>`.
@@ -37,53 +38,66 @@ Cada login revoga os tokens anteriores do usuário. O token expira em 24 horas (
 
 Revoga o token atual. Resposta `204`.
 
-## Formato proposto para as próximas rotas
+## Conteúdo da página inicial (proposto)
 
-Segue o mesmo padrão do back-end atual: Resources dentro de `data` e paginação padrão do Laravel. É o que o mock implementa hoje.
+O painel do César cuida só do editor da página inicial (frame "Painel · Editor da página inicial" no Figma). Ele precisa de um único recurso, lido e gravado inteiro. O mock implementa exatamente este formato.
 
-## Leads (RF16, RF17)
+### `GET /site-content` (público)
 
-### `GET /leads`
-
-| Parâmetro | Exemplo | Uso |
-| --- | --- | --- |
-| `search` | `clinica` | busca em nome, e-mail e empresa |
-| `service_id` | `1` | filtra pelo serviço de interesse |
-| `sort` | `-created_at` ou `created_at` | mais recentes ou mais antigos primeiro |
-| `from` | `2026-10-04` | só leads recebidos a partir da data (usado na visão geral) |
-| `page`, `per_page` | `1`, `10` | paginação |
-
-Item da lista:
+A mesma rota serve a página pública e o painel. Resposta:
 
 ```json
 {
-  "id": 18,
-  "name": "Ana Ribeiro",
-  "email": "ana.ribeiro@example.com",
-  "phone": "(98) 90000-0101",
-  "company": "Colégio Horizonte",
-  "service": { "id": 1, "title": "Realidade Virtual" },
-  "message": "Olá! Queremos levar uma experiência...",
-  "created_at": "2026-10-11T12:14:00.000000Z"
+  "data": {
+    "publishedAt": "2026-10-11T14:32:00.000Z",
+    "sections": [
+      {
+        "key": "hero",
+        "visible": true,
+        "fields": { "title": "Miniverso. Outras realidades.", "primaryLabel": "Ver projetos", "primaryTarget": "projetos" },
+        "items": []
+      },
+      {
+        "key": "servicos",
+        "visible": true,
+        "fields": { "title": "Novas formas de experimentar." },
+        "items": [
+          { "id": "serv-1", "visible": true, "title": "Realidade virtual", "description": "...", "image": "https://...", "imageAlt": "..." }
+        ]
+      }
+    ]
+  }
 }
 ```
 
-`meta` usado pelo painel: `current_page`, `last_page`, `per_page` e `total`.
+- `sections` vem **na ordem da página** e sempre com as 10 chaves: `hero`, `sobre`, `servicos`, `projetos`, `diferenciais`, `experiencia`, `processo`, `clientes`, `contato`, `rodape`. Hero é sempre a primeira e Rodapé a última.
+- `fields` e `items` de cada seção seguem `src/features/home-editor/schema.ts`. Ali estão os nomes, os limites de caracteres e o que é obrigatório.
+- Se o back-end preferir tabelas separadas para serviços e projetos (RF13, RF14), dá para montar este JSON num Resource. O painel não precisa saber como o dado é guardado.
 
-### `GET /leads/{id}`
+### `PUT /site-content` (autenticado)
 
-`{ "data": { ...mesmo formato do item } }` ou `404`.
+Corpo: `{ "sections": [...] }`, no mesmo formato. Publica tudo de uma vez (RF18, RNF44).
 
-### `DELETE /leads/{id}`
+| Status | Quando | O painel faz |
+| --- | --- | --- |
+| `200` | conteúdo válido | `{ "data": { ...conteúdo, "publishedAt": "<agora>" } }`; mostra "Página inicial publicada" |
+| `422` | regra violada | `{ "message": "...", "errors": { "<seção>": ... } }`; destaca as seções e mantém o rascunho (RNF31) |
 
-`204`. O painel só chama depois da confirmação no modal (RNF42).
+Regras que o back-end também deve validar (RNF23), iguais às de `src/features/home-editor/rules.ts`:
 
-## Serviços e projetos (leitura usada nesta versão)
+1. Campos obrigatórios e limites de caracteres do schema.
+2. Seções obrigatórias (Hero, Sobre, Serviços, Projetos, Contato, Rodapé) sempre `visible: true`; Hero primeiro e Rodapé por último.
+3. `experiencia` só fica visível quando a experiência 3D existir (RIU20).
+4. `clientes` só fica visível com pelo menos um logo `authorized: true` (RIU22, RIU23).
+5. `projetos.fields.featured` aponta para um projeto visível (RIU17).
+6. Imagem enviada exige texto alternativo (RNF34).
 
-- `GET /services`: `{ "data": [{ "id": 1, "title": "...", "description": "...", "image_url": null }] }`. Usado no filtro de leads e no total da visão geral.
-- `GET /projects?per_page=1`: o painel lê só `meta.total`, para o total da visão geral.
+### Envio de imagens (a combinar)
 
-O cadastro, a edição e a exclusão de serviços (RF13) e projetos (RF14) entram nas versões 0.2 e 0.3. O formato dessas rotas, inclusive o envio de imagens (RNF24), precisa ser combinado antes.
+Hoje o painel confere tipo, extensão e tamanho no navegador (JPG, PNG ou WebP até 2 MB; logos PNG ou WebP até 1 MB; modelo 3D .glb até 10 MB) e, no mock, guarda a prévia no próprio JSON. Com o back-end, a proposta é:
+
+- `POST /uploads` (autenticado, `multipart/form-data`, campo `file`) devolve `{ "data": { "url": "https://..." } }`;
+- o painel grava só a `url` no campo da seção.
 
 ## Erros
 
@@ -92,14 +106,14 @@ O cadastro, a edição e a exclusão de serviços (RF13) e projetos (RF14) entra
 | `401` / `419` | apaga a sessão local e volta ao login com o aviso de sessão expirada |
 | `403` | "Você não tem permissão para fazer isso." |
 | `404` | "Não encontramos este item. Ele pode ter sido excluído." |
-| `422` | destaca os campos listados em `errors` (usado nos formulários das próximas versões) |
+| `422` | marca as seções com erro e mantém o rascunho na tela |
 | `429` | "Muitas tentativas seguidas. Aguarde um pouco e tente de novo." |
 | `5xx` | "Algo deu errado do nosso lado. Tente de novo em instantes." Detalhes técnicos nunca chegam à tela (RNF20, RNF43) |
 
 ## Perguntas para o back-end
 
-1. Quando entram as rotas de leads, serviços, projetos e conteúdo? Os nomes de campo propostos aqui servem (o `UserResource` usa `nome` em português; vale padronizar o idioma dos campos)?
-2. O RF11 prevê login por e-mail ou usuário. O `LoginRequest` aceita só e-mail. Fica só e-mail e atualizamos o DRDA?
-3. O `throttle:6,1` conta por IP. Como o painel chama a API pelo servidor do Next.js, todos os acessos saem do mesmo IP. Dá para configurar o TrustProxies para ler o `X-Forwarded-For` do painel?
-4. A rota pública que recebe o formulário de contato do site (RF08) vai gravar os leads nesse mesmo recurso `leads`?
+1. Dá para criar `GET /site-content` e `PUT /site-content` neste formato? Se serviços e projetos virarem tabelas próprias, o Resource pode montar o mesmo JSON.
+2. Qual rota recebe as imagens (`POST /uploads` ou outra) e onde elas ficam guardadas (`config/filesystems.php` já tem o disco `public`)?
+3. O RF11 prevê login por e-mail ou usuário. O `LoginRequest` aceita só e-mail. Fica só e-mail e atualizamos o DRDA?
+4. O `throttle:6,1` conta por IP. Como o painel chama a API pelo servidor do Next.js, todos os acessos saem do mesmo IP. Dá para configurar o TrustProxies para ler o `X-Forwarded-For` do painel?
 5. O DRDA (3.1.3) cita Firebase como banco; o back-end usa MySQL. Vale atualizar o DRDA.

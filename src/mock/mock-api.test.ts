@@ -12,7 +12,14 @@ async function token(): Promise<string> {
   return (response.data as { data: { token: string } }).data.token;
 }
 
-type Page = { data: Array<{ id: number; name: string; created_at: string; service: { id: number } | null }>; meta: { total: number; last_page: number } };
+type Content = { sections: Array<{ key: string; visible: boolean; fields: Record<string, unknown>; items: Array<Record<string, unknown>> }>; publishedAt: string };
+
+async function getContent(): Promise<Content> {
+  return ((await mockApi({ method: "GET", path: "/site-content" })).data as { data: Content }).data;
+}
+
+const put = async (sections: Content["sections"], auth: string | null) =>
+  mockApi({ method: "PUT", path: "/site-content", body: JSON.stringify({ sections }), contentType: "application/json", token: auth });
 
 describe("mock da API", () => {
   beforeEach(() => resetMockStore());
@@ -42,48 +49,44 @@ describe("mock da API", () => {
     assert.equal((await login("admin@miniverso.test", "miniverso123")).status, 429);
   });
 
-  it("exige token nas rotas do painel (RNF13)", async () => {
-    assert.equal((await mockApi({ method: "GET", path: "/leads" })).status, 401);
+  it("exige token para publicar e para /me (RNF13)", async () => {
+    const { sections } = await getContent();
+    assert.equal((await put(sections, null)).status, 401);
     assert.equal((await mockApi({ method: "GET", path: "/me", token: "mock.invalido" })).status, 401);
   });
 
-  it("lista leads paginados, do mais recente ao mais antigo", async () => {
-    const response = await mockApi({ method: "GET", path: "/leads", search: "?per_page=10", token: await token() });
-    const page = response.data as Page;
+  it("entrega a página com Hero no topo e Rodapé no fim", async () => {
+    const content = await getContent();
+    assert.equal(content.sections.length, 10);
+    assert.equal(content.sections[0].key, "hero");
+    assert.equal(content.sections.at(-1)?.key, "rodape");
+  });
+
+  it("publica alterações válidas e atualiza a data (RF18)", async () => {
+    const before = await getContent();
+    const sections = before.sections.map((section) =>
+      section.key === "sobre" ? { ...section, fields: { ...section.fields, title: "Quem somos" } } : section,
+    );
+    const response = await put(sections, await token());
     assert.equal(response.status, 200);
-    assert.equal(page.data.length, 10);
-    assert.equal(page.meta.total, 18);
-    assert.equal(page.meta.last_page, 2);
-    const dates = page.data.map((lead) => new Date(lead.created_at).getTime());
-    assert.deepEqual(dates, [...dates].sort((a, b) => b - a));
+    const after = await getContent();
+    assert.equal(after.sections.find((section) => section.key === "sobre")?.fields.title, "Quem somos");
+    assert.notEqual(after.publishedAt, before.publishedAt);
   });
 
-  it("busca sem diferenciar acentos e maiúsculas", async () => {
-    const response = await mockApi({ method: "GET", path: "/leads", search: "?search=CLINICA", token: await token() });
-    const page = response.data as Page;
-    assert.equal(page.meta.total, 1);
-    assert.equal(page.data[0].name, "Carla Mendes");
+  it("recusa conteúdo inválido com 422 e mantém o publicado (RNF23)", async () => {
+    const before = await getContent();
+    const sections = before.sections.map((section) =>
+      section.key === "hero" ? { ...section, fields: { ...section.fields, title: "" } } : section,
+    );
+    const response = await put(sections, await token());
+    assert.equal(response.status, 422);
+    assert.ok("hero" in (response.data as { errors: Record<string, unknown> }).errors);
+    assert.deepEqual(await getContent(), before);
   });
 
-  it("filtra por serviço de interesse", async () => {
-    const response = await mockApi({ method: "GET", path: "/leads", search: "?service_id=1&per_page=50", token: await token() });
-    const page = response.data as Page;
-    assert.ok(page.meta.total > 0);
-    assert.ok(page.data.every((lead) => lead.service?.id === 1));
-  });
-
-  it("filtra por data mínima", async () => {
-    const from = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    const response = await mockApi({ method: "GET", path: "/leads", search: `?from=${from}&per_page=50`, token: await token() });
-    const page = response.data as Page;
-    assert.ok(page.meta.total >= 6 && page.meta.total <= 8);
-  });
-
-  it("exclui um lead e depois responde 404", async () => {
-    const auth = await token();
-    assert.equal((await mockApi({ method: "DELETE", path: "/leads/18", token: auth })).status, 204);
-    assert.equal((await mockApi({ method: "GET", path: "/leads/18", token: auth })).status, 404);
-    const page = (await mockApi({ method: "GET", path: "/leads", token: auth })).data as Page;
-    assert.equal(page.meta.total, 17);
+  it("recusa a lista de seções incompleta", async () => {
+    const { sections } = await getContent();
+    assert.equal((await put(sections.slice(1), await token())).status, 422);
   });
 });

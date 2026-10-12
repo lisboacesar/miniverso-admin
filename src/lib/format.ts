@@ -35,7 +35,7 @@ export function getInitials(name: string): string {
   return (first + last).toUpperCase();
 }
 
-/** "1 lead", "2 leads" */
+/** "1 seção", "2 seções" */
 export function pluralize(count: number, singular: string, plural: string): string {
   return `${count} ${count === 1 ? singular : plural}`;
 }

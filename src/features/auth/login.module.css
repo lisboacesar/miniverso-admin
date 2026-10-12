@@ -31,6 +31,12 @@
   gap: 2px;
 }
 
+.brandLogo {
+  display: block;
+  width: 180px;
+  height: auto;
+}
+
 .brandName {
   font-family: var(--font-display);
   font-size: var(--text-xl);

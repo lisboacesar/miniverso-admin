@@ -5,7 +5,9 @@
  *
  * Os dados ficam em memória (globalThis) e voltam ao estado inicial quando o servidor reinicia.
  */
-import { SEED_PROJECTS, SEED_SERVICES, createSeedLeads, type MockLead, type MockProject, type MockService } from "./seed";
+import { validateContent } from "@/features/home-editor/rules";
+import type { SiteContent } from "@/features/home-editor/types";
+import { createSeedContent } from "./site-content-seed";
 
 export type MockRequest = {
   method: string;
@@ -27,9 +29,7 @@ export type MockResponse = {
 type LoginAttempts = { failures: number; lockedUntil: number };
 
 type MockStore = {
-  leads: MockLead[];
-  services: MockService[];
-  projects: MockProject[];
+  content: SiteContent;
   attempts: Map<string, LoginAttempts>;
 };
 
@@ -48,9 +48,7 @@ const globalForMock = globalThis as typeof globalThis & { __miniversoMockStore?:
 
 function createStore(): MockStore {
   return {
-    leads: createSeedLeads(new Date()),
-    services: SEED_SERVICES.map((service) => ({ ...service })),
-    projects: SEED_PROJECTS.map((project) => ({ ...project })),
+    content: createSeedContent(),
     attempts: new Map(),
   };
 }
@@ -120,54 +118,6 @@ function parseBody(request: MockRequest): Record<string, unknown> {
   }
 }
 
-function normalize(value: string): string {
-  return value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
-}
-
-function serviceSummary(id: number | null) {
-  const service = store().services.find((item) => item.id === id);
-  return service ? { id: service.id, title: service.title } : null;
-}
-
-function leadResource(lead: MockLead) {
-  return {
-    id: lead.id,
-    name: lead.name,
-    email: lead.email,
-    phone: lead.phone,
-    company: lead.company,
-    service: serviceSummary(lead.service_id),
-    message: lead.message,
-    created_at: lead.created_at,
-  };
-}
-
-function paginate<T>(items: T[], params: URLSearchParams, path: string) {
-  const perPage = Math.min(Math.max(Number(params.get("per_page")) || 15, 1), 50);
-  const lastPage = Math.max(1, Math.ceil(items.length / perPage));
-  const page = Math.min(Math.max(Number(params.get("page")) || 1, 1), lastPage);
-  const start = (page - 1) * perPage;
-  const data = items.slice(start, start + perPage);
-  return {
-    data,
-    links: {
-      first: `${path}?page=1`,
-      last: `${path}?page=${lastPage}`,
-      prev: page > 1 ? `${path}?page=${page - 1}` : null,
-      next: page < lastPage ? `${path}?page=${page + 1}` : null,
-    },
-    meta: {
-      current_page: page,
-      from: data.length ? start + 1 : null,
-      last_page: lastPage,
-      path,
-      per_page: perPage,
-      to: data.length ? start + data.length : null,
-      total: items.length,
-    },
-  };
-}
-
 function handleLogin(request: MockRequest): MockResponse {
   const body = parseBody(request);
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
@@ -201,27 +151,19 @@ function handleLogin(request: MockRequest): MockResponse {
   return json(200, { data: { token: issueToken(), user: userResource() } });
 }
 
-function handleLeadsList(params: URLSearchParams): MockResponse {
-  const search = normalize(params.get("search") ?? "");
-  const serviceId = Number(params.get("service_id")) || null;
-  const from = params.get("from");
-  const fromTime = from ? new Date(`${from}T00:00:00`).getTime() : null;
-  const ascending = params.get("sort") === "created_at";
-
-  const leads = store()
-    .leads.filter((lead) => {
-      if (serviceId !== null && lead.service_id !== serviceId) return false;
-      if (fromTime !== null && !Number.isNaN(fromTime) && new Date(lead.created_at).getTime() < fromTime) return false;
-      if (!search) return true;
-      return [lead.name, lead.email, lead.company ?? ""].some((field) => normalize(field).includes(search));
-    })
-    .sort((a, b) => {
-      const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-      return ascending ? diff : -diff;
-    })
-    .map(leadResource);
-
-  return json(200, paginate(leads, params, "/api/leads"));
+/** Valida no "servidor" também (RNF23), com as mesmas regras do painel. */
+function handleContentUpdate(request: MockRequest): MockResponse {
+  const body = parseBody(request) as Partial<SiteContent>;
+  if (!Array.isArray(body.sections) || body.sections.length !== store().content.sections.length) {
+    return json(422, { message: "Conteúdo inválido.", errors: { sections: ["Conteúdo inválido."] } });
+  }
+  const candidate: SiteContent = { sections: body.sections, publishedAt: store().content.publishedAt };
+  const problems = validateContent(candidate);
+  if (Object.keys(problems).length > 0) {
+    return json(422, { message: "Revise os campos destacados.", errors: problems });
+  }
+  store().content = { sections: candidate.sections, publishedAt: new Date().toISOString() };
+  return json(200, { data: store().content });
 }
 
 function delay(): Promise<void> {
@@ -233,17 +175,15 @@ export async function mockApi(request: MockRequest): Promise<MockResponse> {
   await delay();
   const method = request.method.toUpperCase();
   const segments = request.path.split("/").filter(Boolean);
-  const params = new URLSearchParams(request.search ?? "");
-  const [resource, id] = segments;
+  const [resource] = segments;
 
   if (method === "POST" && resource === "login" && segments.length === 1) return handleLogin(request);
 
-  // Leitura pública, como no site: serviços e projetos não exigem login.
-  if (method === "GET" && resource === "services" && segments.length === 1) {
-    return json(200, { data: store().services });
-  }
-  if (method === "GET" && resource === "projects" && segments.length === 1) {
-    return json(200, paginate(store().projects, params, "/api/projects"));
+  // Leitura pública, como no site: a página inicial lê o conteúdo sem login.
+  // Com um token vencido, responde 401 como o Sanctum, para o painel encerrar a sessão.
+  if (method === "GET" && resource === "site-content" && segments.length === 1) {
+    if (request.token && !request.trustToken && !isValidToken(request.token)) return unauthenticated();
+    return json(200, { data: store().content });
   }
 
   if (!request.trustToken && !isValidToken(request.token)) return unauthenticated();
@@ -251,20 +191,7 @@ export async function mockApi(request: MockRequest): Promise<MockResponse> {
 
   if (resource === "logout" && method === "POST") return noContent();
   if (resource === "me" && method === "GET") return json(200, { data: userResource() });
-
-  if (resource === "leads") {
-    if (segments.length === 1 && method === "GET") return handleLeadsList(params);
-    if (segments.length === 2) {
-      const leads = store().leads;
-      const index = leads.findIndex((lead) => String(lead.id) === id);
-      if (index === -1) return notFound();
-      if (method === "GET") return json(200, { data: leadResource(leads[index]) });
-      if (method === "DELETE") {
-        leads.splice(index, 1);
-        return noContent();
-      }
-    }
-  }
+  if (resource === "site-content" && segments.length === 1 && method === "PUT") return handleContentUpdate(request);
 
   return notFound();
 }

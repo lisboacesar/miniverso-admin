@@ -94,12 +94,14 @@ export function LoginForm({ reason, redirectTo }: LoginFormProps) {
     <div className={styles.page}>
       <aside className={styles.aside}>
         <div className={styles.brand}>
-          <span className={styles.brandName}>Miniverso</span>
+          {/* Logo oficial exportado do Figma (versão branca, para fundo escuro) */}
+          {/* eslint-disable-next-line @next/next/no-img-element -- SVG estático, sem otimização */}
+          <img src="/brand/logo-branca-horizontal.svg" alt="Miniverso" className={styles.brandLogo} width={180} height={30} />
           <span className={styles.brandSub}>Painel administrativo</span>
         </div>
         <div className={styles.asideBody}>
-          <p className={styles.asideTitle}>Tudo o que aparece no site, num só lugar.</p>
-          <p className={styles.asideText}>Atualize serviços, projetos e textos da página e acompanhe quem entrou em contato.</p>
+          <p className={styles.asideTitle}>A página inicial do site, editável num só lugar.</p>
+          <p className={styles.asideText}>Organize as seções da página inicial e atualize textos, imagens, serviços e projetos.</p>
         </div>
         <span className={styles.asideFooter}>Acesso restrito à equipe da Miniverso</span>
       </aside>

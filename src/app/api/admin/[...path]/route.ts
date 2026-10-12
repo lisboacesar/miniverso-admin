@@ -15,7 +15,7 @@ type RouteContext = { params: Promise<{ path: string[] }> };
 
 const METHODS_WITH_BODY = new Set(["POST", "PUT", "PATCH"]);
 
-/** Aceita só caminhos simples, como ["leads", "12"]. Recusa "..", vazios e recursos fora da lista. */
+/** Aceita só caminhos simples, como ["site-content"]. Recusa "..", vazios e recursos fora da lista. */
 function toBackendPath(segments: string[] | undefined): string | null {
   if (!segments || segments.length === 0) return null;
   if (segments.some((segment) => segment === "" || segment === "." || segment === "..")) return null;

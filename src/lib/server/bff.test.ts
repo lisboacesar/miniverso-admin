@@ -4,7 +4,7 @@
  */
 import assert from "node:assert/strict";
 import { beforeEach, describe, it } from "node:test";
-import { DELETE as proxyDelete, GET as proxyGet } from "@/app/api/admin/[...path]/route";
+import { GET as proxyGet, PUT as proxyPut } from "@/app/api/admin/[...path]/route";
 import { POST as login } from "@/app/api/auth/login/route";
 import { POST as logout } from "@/app/api/auth/logout/route";
 import { GET as sessionExpired } from "@/app/api/auth/session-expired/route";
@@ -89,43 +89,71 @@ describe("proxy /api/admin/*", () => {
   beforeEach(() => resetMockStore());
 
   it("responde 401 sem sessão (RNF13)", async () => {
-    const response = await proxyGet(new Request(`${ORIGIN}/api/admin/leads`), context("leads"));
+    const response = await proxyGet(new Request(`${ORIGIN}/api/admin/site-content`), context("site-content"));
     assert.equal(response.status, 401);
   });
 
-  it("repassa a chamada com o token e devolve os dados", async () => {
+  it("repassa a chamada com o token e devolve o conteúdo da página inicial", async () => {
     const cookie = await sessionCookie();
-    const response = await proxyGet(
-      new Request(`${ORIGIN}/api/admin/leads?per_page=5`, { headers: { cookie } }),
-      context("leads"),
-    );
+    const response = await proxyGet(new Request(`${ORIGIN}/api/admin/site-content`, { headers: { cookie } }), context("site-content"));
     assert.equal(response.status, 200);
-    const body = (await response.json()) as { data: unknown[]; meta: { total: number } };
-    assert.equal(body.data.length, 5);
-    assert.equal(body.meta.total, 18);
+    const body = (await response.json()) as { data: { sections: Array<{ key: string }> } };
+    assert.equal(body.data.sections[0].key, "hero");
+    assert.equal(body.data.sections.at(-1)?.key, "rodape");
   });
 
   it("recusa caminhos fora da lista e tentativas de subir de pasta", async () => {
     const cookie = await sessionCookie();
     const outside = await proxyGet(new Request(`${ORIGIN}/api/admin/users`, { headers: { cookie } }), context("users"));
     assert.equal(outside.status, 404);
-    const traversal = await proxyGet(new Request(`${ORIGIN}/api/admin/leads/../me`, { headers: { cookie } }), context("leads", "..", "me"));
+    const removed = await proxyGet(new Request(`${ORIGIN}/api/admin/leads`, { headers: { cookie } }), context("leads"));
+    assert.equal(removed.status, 404);
+    const traversal = await proxyGet(
+      new Request(`${ORIGIN}/api/admin/site-content/../me`, { headers: { cookie } }),
+      context("site-content", "..", "me"),
+    );
     assert.equal(traversal.status, 404);
   });
 
-  it("exclui um lead (DELETE) e devolve 204", async () => {
+  it("publica o conteúdo (PUT) e devolve a data de publicação (RF18)", async () => {
     const cookie = await sessionCookie();
-    const response = await proxyDelete(
-      new Request(`${ORIGIN}/api/admin/leads/18`, { method: "DELETE", headers: { cookie, origin: ORIGIN, host: "localhost:3000" } }),
-      context("leads", "18"),
+    const current = (await (await proxyGet(new Request(`${ORIGIN}/api/admin/site-content`, { headers: { cookie } }), context("site-content"))).json()) as {
+      data: { sections: Array<{ key: string; fields: Record<string, unknown> }>; publishedAt: string };
+    };
+    const sections = current.data.sections.map((section) =>
+      section.key === "hero" ? { ...section, fields: { ...section.fields, title: "Nova chamada" } } : section,
     );
-    assert.equal(response.status, 204);
+    const response = await proxyPut(
+      new Request(`${ORIGIN}/api/admin/site-content`, {
+        method: "PUT",
+        headers: { cookie, origin: ORIGIN, host: "localhost:3000", "content-type": "application/json" },
+        body: JSON.stringify({ sections }),
+      }),
+      context("site-content"),
+    );
+    assert.equal(response.status, 200);
+    const body = (await response.json()) as { data: { sections: typeof sections; publishedAt: string } };
+    assert.equal(body.data.sections[0].fields.title, "Nova chamada");
+    assert.notEqual(body.data.publishedAt, current.data.publishedAt);
+  });
+
+  it("recusa PUT de outra origem (CSRF)", async () => {
+    const cookie = await sessionCookie();
+    const response = await proxyPut(
+      new Request(`${ORIGIN}/api/admin/site-content`, {
+        method: "PUT",
+        headers: { cookie, origin: "https://site-malicioso.example", host: "localhost:3000", "content-type": "application/json" },
+        body: "{}",
+      }),
+      context("site-content"),
+    );
+    assert.equal(response.status, 403);
   });
 
   it("encerra a sessão local quando o token não vale mais", async () => {
     const response = await proxyGet(
-      new Request(`${ORIGIN}/api/admin/leads`, { headers: { cookie: `${SESSION_COOKIE}=mock.vencido` } }),
-      context("leads"),
+      new Request(`${ORIGIN}/api/admin/site-content`, { headers: { cookie: `${SESSION_COOKIE}=mock.vencido` } }),
+      context("site-content"),
     );
     assert.equal(response.status, 401);
     assert.match(response.headers.get("set-cookie") ?? "", /Max-Age=0/);

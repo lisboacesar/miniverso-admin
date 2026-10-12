@@ -3,6 +3,30 @@
 Mudanças do painel administrativo, da mais recente para a mais antiga.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). O detalhamento de cada entrega, com capturas de tela, está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md).
 
+## [0.2.0] - 2026-10-12
+
+### Alterado
+
+- Escopo corrigido: o painel passa a ser só o editor da página inicial, como no frame "Painel · Editor da página inicial" do Figma
+- `/admin` abre direto em `/admin/pagina-inicial`; o menu lateral tem um único item
+- Cores e fontes trocadas pelas variáveis do Figma (fundo `#05060A`, azul `#2450E6`, Inter e Sofia Sans Extra Condensed) e logo oficial no menu e no login
+- Mock e ponte `/api/admin/*` liberam só o recurso `site-content`
+
+### Adicionado
+
+- Estrutura da página: ordem das seções com setas, Hero e Rodapé fixos, seções obrigatórias marcadas, opcionais com botão de exibir
+- Regras do DRDA no editor: Experiência interativa bloqueada (RIU20), Clientes só com logo autorizado (RIU22, RIU23), projeto em destaque visível (RIU17)
+- Formulário de cada seção montado a partir de `schema.ts`, com contador de caracteres e campos obrigatórios marcados
+- Itens das seções (serviços, projetos, etapas, logos, redes) com adicionar, editar, reordenar, ocultar e remover com confirmação
+- Envio de imagem com prévia, substituir, remover e validação de tipo, extensão e tamanho; texto alternativo obrigatório
+- Rascunho com aviso de alterações não publicadas, "Descartar" e "Salvar e publicar"; o rascunho continua na tela se a publicação falhar
+- Componentes `Switch`, `FormDialog` (modal ou painel lateral), `TextAreaField` e `CheckboxField`
+- Testes das regras do editor e da rota `site-content`
+
+### Removido
+
+- Visão geral, Leads e telas reservadas de Projetos, Serviços e Conteúdo, que não fazem parte desta entrega
+
 ## [0.1.1] - 2026-10-11
 
 ### Alterado

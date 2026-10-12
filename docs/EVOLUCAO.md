@@ -12,10 +12,94 @@ Cada entrega ganha uma entrada neste arquivo, com o que mudou, os requisitos do 
 | --- | --- | --- | --- |
 | 0.1.0 | 11/10/2026 | Base do painel, login, sessão, visão geral e leads | entregue |
 | 0.1.1 | 11/10/2026 | Login e sessão integrados ao back-end real | entregue |
+| 0.2.0 | 12/10/2026 | Editor da página inicial (escopo corrigido) | entregue com mock |
+| 0.3.0 | a definir | Editor ligado às rotas reais de conteúdo e envio de imagens | depende do back-end |
+| 0.4.0 | a definir | Ajustes finais, testes com pessoas de fora da equipe e publicação | planejada |
+
+--- | --- | --- | --- |
+| 0.1.0 | 11/10/2026 | Base do painel, login, sessão, visão geral e leads | entregue |
+| 0.1.1 | 11/10/2026 | Login e sessão integrados ao back-end real | entregue |
 | 0.2.0 | a definir | Serviços: cadastrar, editar e remover | planejada |
 | 0.3.0 | a definir | Projetos: cadastrar, editar, remover e enviar imagens | planejada |
 | 0.4.0 | a definir | Conteúdo do site: textos e imagens da página inicial | planejada |
 | 0.5.0 | a definir | Ajustes finais, testes com pessoas de fora da equipe e publicação | planejada |
+
+---
+
+## v0.2.0 · 12/10/2026 · Editor da página inicial
+
+### Por que o escopo mudou
+
+A v0.1 montou um painel completo (visão geral, leads, projetos, serviços). Na divisão da equipe, o painel desta parte é só o frame **"Painel · Editor da página inicial"** do Figma: a página que muda a estrutura e o conteúdo da home. Por isso a v0.2.0 remove visão geral e leads e entrega o editor. Login, sessão e a ponte segura com a API continuam iguais.
+
+### O que foi entregue
+
+- **Estrutura da página**: as 10 seções na ordem da página pública. Setas sobem e descem cada seção; Hero fica sempre no topo e Rodapé no fim. Seções obrigatórias mostram "Obrigatória"; as opcionais têm botão de exibir.
+- **Editor de seção** montado a partir de `schema.ts`: textos com limite e contador, destinos dos botões, imagens, modelo 3D e opções. Cada seção mostra os requisitos que atende.
+- **Itens da seção** (destaques, serviços, projetos, diferenciais, etapas, logos e redes sociais): adicionar, editar, reordenar, ocultar e remover. Projetos abrem num painel lateral porque o formulário é longo.
+- **Envio de imagem** com prévia, substituir e remover. O arquivo é conferido antes de aceitar e o texto alternativo é obrigatório quando há imagem.
+- **Rascunho e publicação**: as mudanças ficam em rascunho, com aviso de quantas seções mudaram. "Salvar e publicar" valida tudo antes de enviar. Se falhar, o rascunho continua na tela. "Descartar" volta ao publicado depois de confirmar. O navegador avisa ao sair com alterações pendentes.
+- **Identidade**: cores e fontes das variáveis do Figma e logo oficial exportado do arquivo.
+
+### Requisitos atendidos
+
+| Requisito | Como foi atendido |
+| --- | --- |
+| RF15, RF18, RNF44 | Edição de textos e imagens das seções, publicada no site de uma vez |
+| RF13, RIU13 a RIU15 | Serviços com título, descrição breve e imagem, em quantidade livre e ordem definida |
+| RF14, RIU16 a RIU18, RN03 | Projetos com capa, categoria e descrição; projeto oculto ou removido sai da página |
+| RIU17 | Projeto em destaque escolhido numa lista e precisa estar visível |
+| RIU20 | Experiência interativa bloqueada, com o motivo explicado |
+| RIU21 | Etapas do Processo numeradas pela ordem da lista |
+| RIU22, RIU23 | Clientes só aparece com logo autorizado; sem logo, a seção fica oculta |
+| RNF24 | Tipo, extensão e tamanho do arquivo conferidos antes do envio |
+| RNF29, RNF08 | Status de publicação, botão com carregamento e avisos de sucesso ou falha |
+| RNF30, RNF31, RNF32 | Erro por campo dizendo o problema, rascunho preservado e obrigatórios marcados |
+| RNF34 | Texto alternativo obrigatório para toda imagem enviada |
+| RNF35, RNF40 | Setas no lugar de arrastar, que funcionam no teclado e no toque, com alvos de 44 px |
+| RNF36, RNF39 | Rótulo visível em todo campo; "Alterada" e "Revisar campos" com texto e ícone, não só cor |
+| RNF42 | Remover item e descartar alterações pedem confirmação nomeando o que será perdido |
+| RNF43 | Mensagens sem termos técnicos, como "Não foi possível publicar. Verifique sua conexão e tente de novo." |
+
+### Capturas de tela
+
+Capturas da v0.2.0 em modo mock, com dados fictícios. No ambiente de captura as fontes do Google não carregam, então aparecem as fontes de reserva.
+
+| | |
+| --- | --- |
+| ![Login](prints/v0.2.0/01-login.png) Login com o logo oficial | ![Carregando](prints/v0.2.0/02-editor-carregando.png) Carregando |
+| ![Hero](prints/v0.2.0/03-editor-hero.png) Seção Hero | ![Serviços](prints/v0.2.0/04-editor-servicos.png) Seção Serviços |
+| ![Alterações pendentes](prints/v0.2.0/05-editor-alteracoes-pendentes.png) Alterações não publicadas | ![Erros no modal](prints/v0.2.0/06-modal-servico-erros.png) Campos obrigatórios |
+| ![Arquivo inválido](prints/v0.2.0/07-modal-upload-invalido.png) Arquivo recusado (RNF24) | ![Texto alternativo](prints/v0.2.0/08-modal-alt-obrigatorio.png) Texto alternativo (RNF34) |
+| ![Serviço adicionado](prints/v0.2.0/09-servico-adicionado-toast.png) Serviço adicionado | ![Remover](prints/v0.2.0/10-remover-confirmacao.png) Confirmação (RNF42) |
+| ![Publicar com erro](prints/v0.2.0/11-publicar-com-erro.png) Publicação bloqueada por erro | ![Publicado](prints/v0.2.0/12-publicado-sucesso.png) Publicado |
+| ![Projeto](prints/v0.2.0/13-projeto-drawer.png) Projeto em painel lateral | ![Clientes](prints/v0.2.0/14-clientes-sem-logo.png) Clientes sem logo (RIU23) |
+| ![Experiência](prints/v0.2.0/15-experiencia-bloqueada.png) Experiência bloqueada (RIU20) | ![Falha de rede](prints/v0.2.0/16-publicar-falha-rede.png) Falha ao publicar (RNF31) |
+| ![Erro ao carregar](prints/v0.2.0/17-editor-erro-carregar.png) Erro ao carregar | ![Foco](prints/v0.2.0/18-foco-teclado.png) Foco pelo teclado |
+| ![Tablet](prints/v0.2.0/19-tablet-servicos.png) Tablet | ![Celular, login](prints/v0.2.0/20-mobile-login.png) Celular: login |
+| ![Celular, estrutura](prints/v0.2.0/21-mobile-editor-topo.png) Celular: estrutura | ![Celular, seção](prints/v0.2.0/21b-mobile-apos-escolher.png) Celular: seção escolhida |
+| ![Celular, serviços](prints/v0.2.0/22-mobile-servicos.png) Celular: serviços | ![Celular, projeto](prints/v0.2.0/23-mobile-projeto-form.png) Celular: formulário de projeto |
+
+### Testes
+
+- `npm test`: 51 testes passando. Novos: regras do editor (`rules.test.ts`), leitura e publicação de `site-content` no mock e pela ponte, recusa de PUT de outro site.
+- Fluxos conferidos no navegador: reordenar, ocultar, adicionar e remover itens, arquivo inválido, texto alternativo, publicação com erro, publicação com sucesso, falha de rede, erro ao carregar e navegação por teclado, em 1440, 1024 e 390 px.
+
+### Decisões que divergem do Figma
+
+- **Setas em vez de arrastar**: o wireframe diz "Arraste para reordenar". Arrastar não funciona pelo teclado e é difícil no toque (RNF35, RNF40). As setas fazem o mesmo e cabem no mesmo espaço.
+- **Menu lateral só com "Página inicial"**: o wireframe mostra Dashboard e Leads, que não são desta parte.
+- **"Descartar"** não aparece no Figma; foi incluído porque o rascunho só existe no navegador e precisa de uma saída segura.
+
+### Limitações conhecidas
+
+- O back-end ainda não tem `site-content` nem envio de imagens; o editor roda com o mock (contrato em [CONTRATO-API.md](CONTRATO-API.md)).
+- No mock, as imagens ficam no próprio conteúdo como prévia; com o back-end, o painel vai gravar só a URL devolvida pelo envio.
+- Os serviços e projetos de exemplo começam sem imagem, porque as oficiais ainda não foram enviadas. Para salvar a edição de um deles é preciso enviar a imagem.
+
+### Próximo passo
+
+Combinar com o back-end as rotas `GET/PUT /site-content` e `POST /uploads` e trocar o mock pela API real (v0.3.0).
 
 ---
 

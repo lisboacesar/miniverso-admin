@@ -1,16 +1,16 @@
 /*
  * Tokens de design do painel.
- * Cores da marca retiradas do manual de identidade da Miniverso (#1E1645, #1E4488, #00B7E3).
+ * Cores e fontes vêm das variáveis do arquivo Figma do projeto (Miniverso · Tokens).
  * Contraste conferido para RNF33 (valores em comentário: texto sobre o fundo indicado).
- * Provisório até a conferência com o Figma do painel.
  */
 :root {
-  /* Marca */
-  --mv-indigo-900: #1e1645; /* branco sobre ele: 16,7:1 */
-  --mv-blue-700: #1e4488; /* sobre branco: 9,4:1 */
-  --mv-blue-800: #183a75; /* hover */
-  --mv-blue-50: #ebf1fa;
-  --mv-cyan-500: #00b7e3; /* só como destaque sobre o índigo (7,1:1); no branco não passa para texto */
+  /* Marca: tokens "Miniverso · Tokens" do Figma (página 01 · Fundações & componentes) */
+  --mv-ink: #05060a; /* cor/fundo/base; branco sobre ele: 20,3:1 */
+  --mv-indigo-900: #0b0e16; /* cor/fundo/elevado: menu lateral e títulos */
+  --mv-blue-700: #2450e6; /* cor/marca/azul-600; sobre branco: 6,2:1 */
+  --mv-blue-800: #1233a8; /* cor/marca/azul-700, hover; sobre branco: 10,2:1 */
+  --mv-blue-50: #eef3ff;
+  --mv-cyan-500: #6e93ff; /* cor/estado/foco; sobre o fundo escuro: 7,0:1 */
 
   /* Neutros */
   --gray-0: #ffffff;
@@ -33,9 +33,9 @@
   --warning-700: #8a5300; /* 5,8:1 */
   --warning-50: #fff5dc;
   --warning-200: #f2d8a0;
-  --info-700: #1e4488; /* 8,3:1 */
-  --info-50: #ebf1fa;
-  --info-200: #c5d5ee;
+  --info-700: #1233a8; /* 9,2:1 */
+  --info-50: #eef3ff;
+  --info-200: #c9d6ff;
 
   /* Papéis */
   --color-bg: var(--gray-25);
@@ -48,9 +48,9 @@
   --color-primary-hover: var(--mv-blue-800);
   --color-focus: var(--mv-blue-700);
 
-  /* Tipografia. Thunder (títulos) e Random Grotesque entram quando os arquivos das fontes forem adicionados. */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-display: var(--font-sans);
+  /* Tipografia do Figma: Inter no texto e Sofia Sans Extra Condensed nos títulos (carregadas em app/layout.tsx) */
+  --font-sans: var(--font-inter, ui-sans-serif), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-display: var(--font-sofia, "Arial Narrow"), "Arial Narrow", var(--font-sans);
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-md: 1rem;

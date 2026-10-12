@@ -1,8 +1,7 @@
-import type { Metadata } from "next";
-import { OverviewView } from "@/features/overview/overview-view";
+import { redirect } from "next/navigation";
+import { HOME_EDITOR_PATH } from "@/components/layout/nav";
 
-export const metadata: Metadata = { title: "Visão geral" };
-
-export default function VisaoGeralPage() {
-  return <OverviewView />;
+/** /admin abre direto o editor da página inicial, único módulo do painel nesta versão. */
+export default function PainelPage() {
+  redirect(HOME_EDITOR_PATH);
 }

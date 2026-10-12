@@ -8,7 +8,7 @@ import { getServerConfig } from "./config";
 
 export type BackendRequest = {
   method?: string;
-  /** Caminho sem o prefixo da API. Ex.: "/leads/12" */
+  /** Caminho sem o prefixo da API. Ex.: "/site-content" */
   path: string;
   /** Query string, com "?". Ex.: "?page=2" */
   search?: string;

@@ -73,14 +73,14 @@ describe("modo live com o contrato do metaverso-back", () => {
     assert.equal((await fetchCurrentUser("token-vencido")).kind, "unauthenticated");
   });
 
-  it("serve leads pelo mock enquanto o back-end não tem a rota", async () => {
+  it("serve o conteúdo da página inicial pelo mock enquanto o back-end não tem a rota", async () => {
     const response = await proxyGet(
-      new Request("http://localhost:3000/api/admin/leads?per_page=3", {
+      new Request("http://localhost:3000/api/admin/site-content", {
         headers: { cookie: `miniverso_admin_session=${encodeURIComponent(VALID_TOKEN)}` },
       }),
-      { params: Promise.resolve({ path: ["leads"] }) },
+      { params: Promise.resolve({ path: ["site-content"] }) },
     );
     assert.equal(response.status, 200);
-    assert.equal(((await response.json()) as { data: unknown[] }).data.length, 3);
+    assert.equal(((await response.json()) as { data: { sections: unknown[] } }).data.sections.length, 10);
   });
 });

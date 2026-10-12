@@ -52,7 +52,9 @@ export function AdminShell({ user, siteUrl, idleTimeoutMinutes, children }: Admi
       <nav id="menu-principal" className={styles.sidebar} aria-label="Menu principal">
         <div className={styles.sidebarTop}>
           <div className={styles.brand}>
-            <span className={styles.brandName}>Miniverso</span>
+            {/* Logo oficial exportado do Figma (versão branca, para fundo escuro) */}
+            {/* eslint-disable-next-line @next/next/no-img-element -- SVG estático, sem otimização */}
+            <img src="/brand/logo-branca-horizontal.svg" alt="Miniverso" className={styles.brandLogo} width={160} height={27} />
             <span className={styles.brandSub}>Painel administrativo</span>
           </div>
           <button type="button" className={styles.closeNav} aria-label="Fechar menu" onClick={() => setNavOpen(false)}>

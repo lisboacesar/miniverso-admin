@@ -155,3 +155,54 @@ export function SelectField({ label, hint, error, className, id, required, optio
     </FieldFrame>
   );
 }
+
+type TextAreaProps = BaseFieldProps &
+  Omit<ComponentProps<"textarea">, "className"> & {
+    /** Mostra "12/140" abaixo do campo. */
+    showCount?: boolean;
+  };
+
+export function TextAreaField({ label, hint, error, className, id, required, showCount, maxLength, value, ...textarea }: TextAreaProps) {
+  const generatedId = useId();
+  const fieldId = id ?? generatedId;
+  const length = typeof value === "string" ? value.length : 0;
+  const over = maxLength !== undefined && length > maxLength;
+  return (
+    <FieldFrame id={fieldId} label={label} required={required} hint={hint} error={error} className={className}>
+      <textarea
+        id={fieldId}
+        className={cx(styles.input, styles.textarea, (error || over) && styles.invalid)}
+        required={required}
+        value={value}
+        maxLength={maxLength}
+        aria-invalid={error || over ? true : undefined}
+        aria-describedby={[describedBy(fieldId, hint, error), showCount && maxLength ? `${fieldId}-contador` : null].filter(Boolean).join(" ") || undefined}
+        {...textarea}
+      />
+      {showCount && maxLength !== undefined && (
+        <p id={`${fieldId}-contador`} className={cx(styles.counter, over && styles.counterOver)}>
+          {length}/{maxLength} caracteres
+        </p>
+      )}
+    </FieldFrame>
+  );
+}
+
+type CheckboxProps = Omit<ComponentProps<"input">, "type" | "className"> & { label: string; error?: string };
+
+export function CheckboxField({ label, error, id, ...input }: CheckboxProps) {
+  const generatedId = useId();
+  const fieldId = id ?? generatedId;
+  return (
+    <div className={styles.checkboxField}>
+      <input id={fieldId} type="checkbox" className={styles.checkbox} aria-invalid={error ? true : undefined} {...input} />
+      <label htmlFor={fieldId}>{label}</label>
+      {error && (
+        <p className={styles.error}>
+          <LuCircleAlert aria-hidden="true" />
+          <span>{error}</span>
+        </p>
+      )}
+    </div>
+  );
+}
