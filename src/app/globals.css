@@ -1,0 +1,164 @@
+/*
+ * Tokens de design do painel.
+ * Cores da marca retiradas do manual de identidade da Miniverso (#1E1645, #1E4488, #00B7E3).
+ * Contraste conferido para RNF33 (valores em comentário: texto sobre o fundo indicado).
+ * Provisório até a conferência com o Figma do painel.
+ */
+:root {
+  /* Marca */
+  --mv-indigo-900: #1e1645; /* branco sobre ele: 16,7:1 */
+  --mv-blue-700: #1e4488; /* sobre branco: 9,4:1 */
+  --mv-blue-800: #183a75; /* hover */
+  --mv-blue-50: #ebf1fa;
+  --mv-cyan-500: #00b7e3; /* só como destaque sobre o índigo (7,1:1); no branco não passa para texto */
+
+  /* Neutros */
+  --gray-0: #ffffff;
+  --gray-25: #f4f6fa;
+  --gray-50: #eef1f6;
+  --gray-100: #e1e5ee;
+  --gray-400: #7a8296; /* borda de campo: 3,9:1 */
+  --gray-500: #6b7385; /* placeholder: 4,8:1 */
+  --gray-600: #5b6275; /* texto secundário: 6,1:1 */
+  --gray-900: #17203a; /* texto principal: 16,1:1 */
+
+  /* Status (texto sobre o fundo claro do próprio status) */
+  --success-700: #127a46; /* 4,8:1 */
+  --success-50: #e8f6ee;
+  --success-200: #bfe3cd;
+  --danger-700: #b42318; /* 5,8:1; branco sobre ele: 6,6:1 */
+  --danger-800: #912018;
+  --danger-50: #fdedeb;
+  --danger-200: #f5c2bc;
+  --warning-700: #8a5300; /* 5,8:1 */
+  --warning-50: #fff5dc;
+  --warning-200: #f2d8a0;
+  --info-700: #1e4488; /* 8,3:1 */
+  --info-50: #ebf1fa;
+  --info-200: #c5d5ee;
+
+  /* Papéis */
+  --color-bg: var(--gray-25);
+  --color-surface: var(--gray-0);
+  --color-text: var(--gray-900);
+  --color-text-muted: var(--gray-600);
+  --color-border: var(--gray-100);
+  --color-border-strong: var(--gray-400);
+  --color-primary: var(--mv-blue-700);
+  --color-primary-hover: var(--mv-blue-800);
+  --color-focus: var(--mv-blue-700);
+
+  /* Tipografia. Thunder (títulos) e Random Grotesque entram quando os arquivos das fontes forem adicionados. */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: var(--font-sans);
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.25rem;
+
+  /* Espaçamento em grid de 8 pt (com meio passo de 4) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* Raios: botões totalmente arredondados, como na área pública (RIU09) */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 2px rgb(23 32 58 / 0.06);
+  --shadow-md: 0 8px 24px rgb(23 32 58 / 0.1);
+  --shadow-lg: 0 24px 48px rgb(23 32 58 / 0.2);
+
+  --sidebar-width: 248px;
+  --sidebar-collapsed: 76px;
+  --header-height: 64px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  font-family: var(--font-sans);
+  font-size: var(--text-md);
+  line-height: 1.5;
+  color: var(--color-text);
+  background: var(--color-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+blockquote {
+  margin: 0;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: var(--color-primary);
+}
+
+/* Foco sempre visível para quem navega pelo teclado (RNF35) */
+:focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Trava a rolagem da página com um modal aberto */
+body:has(dialog[open]) {
+  overflow: hidden;
+}
+
+/* Respeita a preferência de reduzir animações (RNF38) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

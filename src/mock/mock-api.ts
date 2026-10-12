@@ -1,0 +1,265 @@
+/**
+ * API de mentira que imita as rotas e respostas do back-end Laravel.
+ * Serve para o painel funcionar antes de o back-end estar disponível.
+ * O contrato imitado está em docs/CONTRATO-API.md.
+ *
+ * Os dados ficam em memória (globalThis) e voltam ao estado inicial quando o servidor reinicia.
+ */
+import { SEED_PROJECTS, SEED_SERVICES, createSeedLeads, type MockLead, type MockProject, type MockService } from "./seed";
+
+export type MockRequest = {
+  method: string;
+  path: string;
+  search?: string;
+  token?: string | null;
+  body?: string | ArrayBuffer | null;
+  contentType?: string | null;
+};
+
+export type MockResponse = {
+  status: number;
+  data: unknown;
+  headers: Headers;
+};
+
+type LoginAttempts = { failures: number; lockedUntil: number };
+
+type MockStore = {
+  leads: MockLead[];
+  services: MockService[];
+  projects: MockProject[];
+  attempts: Map<string, LoginAttempts>;
+};
+
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCK_SECONDS = 60;
+const TOKEN_TTL_SECONDS = 8 * 60 * 60;
+const MOCK_USER = { id: 1, name: "Administrador Miniverso" };
+
+const globalForMock = globalThis as typeof globalThis & { __miniversoMockStore?: MockStore };
+
+function createStore(): MockStore {
+  return {
+    leads: createSeedLeads(new Date()),
+    services: SEED_SERVICES.map((service) => ({ ...service })),
+    projects: SEED_PROJECTS.map((project) => ({ ...project })),
+    attempts: new Map(),
+  };
+}
+
+function store(): MockStore {
+  globalForMock.__miniversoMockStore ??= createStore();
+  return globalForMock.__miniversoMockStore;
+}
+
+/** Volta os dados ao estado inicial (usado nos testes). */
+export function resetMockStore(): void {
+  globalForMock.__miniversoMockStore = createStore();
+}
+
+function credentials() {
+  return {
+    email: (process.env.MOCK_ADMIN_EMAIL || "admin@miniverso.test").toLowerCase(),
+    password: process.env.MOCK_ADMIN_PASSWORD || "miniverso123",
+  };
+}
+
+function json(status: number, data: unknown, extraHeaders: Record<string, string> = {}): MockResponse {
+  return { status, data, headers: new Headers({ "content-type": "application/json", ...extraHeaders }) };
+}
+
+function noContent(): MockResponse {
+  return { status: 204, data: null, headers: new Headers() };
+}
+
+const unauthenticated = () => json(401, { message: "Unauthenticated." });
+const notFound = () => json(404, { message: "Not Found." });
+
+// Token sem estado no servidor: funciona mesmo com várias instâncias (ex.: Vercel).
+// Não é seguro para produção, e não precisa ser: só existe no modo mock.
+function base64UrlEncode(value: string): string {
+  return btoa(value).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+function base64UrlDecode(value: string): string {
+  const padded = value.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(value.length / 4) * 4, "=");
+  return atob(padded);
+}
+
+function issueToken(): string {
+  const exp = Math.floor(Date.now() / 1000) + TOKEN_TTL_SECONDS;
+  return `mock.${base64UrlEncode(JSON.stringify({ sub: MOCK_USER.id, exp }))}`;
+}
+
+function isValidToken(token: string | null | undefined): boolean {
+  if (!token || !token.startsWith("mock.")) return false;
+  try {
+    const payload = JSON.parse(base64UrlDecode(token.slice(5))) as { sub?: number; exp?: number };
+    return payload.sub === MOCK_USER.id && typeof payload.exp === "number" && payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+function parseBody(request: MockRequest): Record<string, unknown> {
+  if (!request.body || !(request.contentType ?? "").includes("json")) return {};
+  try {
+    const text = typeof request.body === "string" ? request.body : new TextDecoder().decode(request.body);
+    const parsed: unknown = JSON.parse(text);
+    return typeof parsed === "object" && parsed !== null ? (parsed as Record<string, unknown>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function normalize(value: string): string {
+  return value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+}
+
+function serviceSummary(id: number | null) {
+  const service = store().services.find((item) => item.id === id);
+  return service ? { id: service.id, title: service.title } : null;
+}
+
+function leadResource(lead: MockLead) {
+  return {
+    id: lead.id,
+    name: lead.name,
+    email: lead.email,
+    phone: lead.phone,
+    company: lead.company,
+    service: serviceSummary(lead.service_id),
+    message: lead.message,
+    created_at: lead.created_at,
+  };
+}
+
+function paginate<T>(items: T[], params: URLSearchParams, path: string) {
+  const perPage = Math.min(Math.max(Number(params.get("per_page")) || 15, 1), 50);
+  const lastPage = Math.max(1, Math.ceil(items.length / perPage));
+  const page = Math.min(Math.max(Number(params.get("page")) || 1, 1), lastPage);
+  const start = (page - 1) * perPage;
+  const data = items.slice(start, start + perPage);
+  return {
+    data,
+    links: {
+      first: `${path}?page=1`,
+      last: `${path}?page=${lastPage}`,
+      prev: page > 1 ? `${path}?page=${page - 1}` : null,
+      next: page < lastPage ? `${path}?page=${page + 1}` : null,
+    },
+    meta: {
+      current_page: page,
+      from: data.length ? start + 1 : null,
+      last_page: lastPage,
+      path,
+      per_page: perPage,
+      to: data.length ? start + data.length : null,
+      total: items.length,
+    },
+  };
+}
+
+function handleLogin(request: MockRequest): MockResponse {
+  const body = parseBody(request);
+  const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+  const password = typeof body.password === "string" ? body.password : "";
+  if (!email || !password) {
+    return json(422, {
+      message: "The email field is required.",
+      errors: { ...(email ? {} : { email: ["The email field is required."] }), ...(password ? {} : { password: ["The password field is required."] }) },
+    });
+  }
+
+  const attempts = store().attempts;
+  const current = attempts.get(email) ?? { failures: 0, lockedUntil: 0 };
+  const now = Date.now();
+  if (current.lockedUntil > now) {
+    const seconds = Math.ceil((current.lockedUntil - now) / 1000);
+    return json(429, { message: `Too many login attempts. Please try again in ${seconds} seconds.` }, { "retry-after": String(seconds) });
+  }
+
+  const expected = credentials();
+  if (email !== expected.email || password !== expected.password) {
+    const failures = current.failures + 1;
+    if (failures >= MAX_FAILED_ATTEMPTS) {
+      attempts.set(email, { failures: 0, lockedUntil: now + LOCK_SECONDS * 1000 });
+      return json(429, { message: `Too many login attempts. Please try again in ${LOCK_SECONDS} seconds.` }, { "retry-after": String(LOCK_SECONDS) });
+    }
+    attempts.set(email, { failures, lockedUntil: 0 });
+    return json(422, {
+      message: "These credentials do not match our records.",
+      errors: { email: ["These credentials do not match our records."] },
+    });
+  }
+
+  attempts.delete(email);
+  return json(200, { token: issueToken(), user: { ...MOCK_USER, email: expected.email } });
+}
+
+function handleLeadsList(params: URLSearchParams): MockResponse {
+  const search = normalize(params.get("search") ?? "");
+  const serviceId = Number(params.get("service_id")) || null;
+  const from = params.get("from");
+  const fromTime = from ? new Date(`${from}T00:00:00`).getTime() : null;
+  const ascending = params.get("sort") === "created_at";
+
+  const leads = store()
+    .leads.filter((lead) => {
+      if (serviceId !== null && lead.service_id !== serviceId) return false;
+      if (fromTime !== null && !Number.isNaN(fromTime) && new Date(lead.created_at).getTime() < fromTime) return false;
+      if (!search) return true;
+      return [lead.name, lead.email, lead.company ?? ""].some((field) => normalize(field).includes(search));
+    })
+    .sort((a, b) => {
+      const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      return ascending ? diff : -diff;
+    })
+    .map(leadResource);
+
+  return json(200, paginate(leads, params, "/api/leads"));
+}
+
+function delay(): Promise<void> {
+  const ms = Number(process.env.MOCK_LATENCY_MS ?? 350);
+  return ms > 0 ? new Promise((resolve) => setTimeout(resolve, ms)) : Promise.resolve();
+}
+
+export async function mockApi(request: MockRequest): Promise<MockResponse> {
+  await delay();
+  const method = request.method.toUpperCase();
+  const segments = request.path.split("/").filter(Boolean);
+  const params = new URLSearchParams(request.search ?? "");
+  const [resource, id] = segments;
+
+  if (method === "POST" && resource === "login" && segments.length === 1) return handleLogin(request);
+
+  // Leitura pública, como no site: serviços e projetos não exigem login.
+  if (method === "GET" && resource === "services" && segments.length === 1) {
+    return json(200, { data: store().services });
+  }
+  if (method === "GET" && resource === "projects" && segments.length === 1) {
+    return json(200, paginate(store().projects, params, "/api/projects"));
+  }
+
+  if (!isValidToken(request.token)) return unauthenticated();
+
+  if (resource === "logout" && method === "POST") return noContent();
+  if (resource === "me" && method === "GET") return json(200, { data: { ...MOCK_USER, email: credentials().email } });
+
+  if (resource === "leads") {
+    if (segments.length === 1 && method === "GET") return handleLeadsList(params);
+    if (segments.length === 2) {
+      const leads = store().leads;
+      const index = leads.findIndex((lead) => String(lead.id) === id);
+      if (index === -1) return notFound();
+      if (method === "GET") return json(200, { data: leadResource(leads[index]) });
+      if (method === "DELETE") {
+        leads.splice(index, 1);
+        return noContent();
+      }
+    }
+  }
+
+  return notFound();
+}

@@ -1,0 +1,56 @@
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
+import { mapLead, mapPaginated, mapUser, unwrapData } from "./mappers";
+
+describe("mappers", () => {
+  it("tira o embrulho { data } do Laravel", () => {
+    assert.deepEqual(unwrapData({ data: [1, 2] }), [1, 2]);
+    assert.deepEqual(unwrapData([1, 2]), [1, 2]);
+  });
+
+  it("converte um lead da API para o modelo do front", () => {
+    const lead = mapLead({
+      id: 7,
+      name: "Ana Ribeiro",
+      email: "ana@example.com",
+      phone: "",
+      company: null,
+      service: { id: 1, title: "Realidade Virtual" },
+      message: "Olá",
+      created_at: "2026-10-01T12:00:00.000Z",
+    });
+    assert.deepEqual(lead, {
+      id: "7",
+      name: "Ana Ribeiro",
+      email: "ana@example.com",
+      phone: null,
+      company: null,
+      serviceId: "1",
+      serviceName: "Realidade Virtual",
+      message: "Olá",
+      createdAt: "2026-10-01T12:00:00.000Z",
+    });
+  });
+
+  it("descarta itens sem id", () => {
+    assert.equal(mapLead({ name: "Sem id" }), null);
+    assert.equal(mapUser({ id: 1 }), null);
+  });
+
+  it("lê a paginação do Laravel", () => {
+    const page = mapPaginated(
+      { data: [{ id: 1, name: "A", email: "a@example.com", created_at: "" }], meta: { current_page: 2, last_page: 3, per_page: 1, total: 3 } },
+      mapLead,
+    );
+    assert.equal(page.items.length, 1);
+    assert.equal(page.page, 2);
+    assert.equal(page.lastPage, 3);
+    assert.equal(page.total, 3);
+  });
+
+  it("aceita lista simples sem meta", () => {
+    const page = mapPaginated([{ id: 1, name: "A", email: "a@example.com" }], mapLead);
+    assert.equal(page.total, 1);
+    assert.equal(page.lastPage, 1);
+  });
+});
