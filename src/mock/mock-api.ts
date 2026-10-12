@@ -14,6 +14,8 @@ export type MockRequest = {
   token?: string | null;
   body?: string | ArrayBuffer | null;
   contentType?: string | null;
+  /** Usado no modo híbrido: o token veio do back-end real e já foi validado lá. */
+  trustToken?: boolean;
 };
 
 export type MockResponse = {
@@ -31,10 +33,16 @@ type MockStore = {
   attempts: Map<string, LoginAttempts>;
 };
 
-const MAX_FAILED_ATTEMPTS = 5;
+// Igual ao back-end: throttle:6,1 na rota /login (a 7ª tentativa em 1 minuto recebe 429).
+const MAX_FAILED_ATTEMPTS = 6;
 const LOCK_SECONDS = 60;
 const TOKEN_TTL_SECONDS = 8 * 60 * 60;
-const MOCK_USER = { id: 1, name: "Administrador Miniverso" };
+const MOCK_USER = { id: 1, nome: "Administrador Miniverso" };
+
+/** Mesmo formato do UserResource do back-end. */
+function userResource() {
+  return { nome: MOCK_USER.nome, email: credentials().email, created_at: "01/09/2026 10:00:00", updated_at: "01/09/2026 10:00:00" };
+}
 
 const globalForMock = globalThis as typeof globalThis & { __miniversoMockStore?: MockStore };
 
@@ -72,7 +80,7 @@ function noContent(): MockResponse {
   return { status: 204, data: null, headers: new Headers() };
 }
 
-const unauthenticated = () => json(401, { message: "Unauthenticated." });
+const unauthenticated = () => json(401, { message: "Não autenticado." });
 const notFound = () => json(404, { message: "Not Found." });
 
 // Token sem estado no servidor: funciona mesmo com várias instâncias (ex.: Vercel).
@@ -166,8 +174,8 @@ function handleLogin(request: MockRequest): MockResponse {
   const password = typeof body.password === "string" ? body.password : "";
   if (!email || !password) {
     return json(422, {
-      message: "The email field is required.",
-      errors: { ...(email ? {} : { email: ["The email field is required."] }), ...(password ? {} : { password: ["The password field is required."] }) },
+      message: "O campo email é obrigatório.",
+      errors: { ...(email ? {} : { email: ["O campo email é obrigatório."] }), ...(password ? {} : { password: ["O campo password é obrigatório."] }) },
     });
   }
 
@@ -176,25 +184,21 @@ function handleLogin(request: MockRequest): MockResponse {
   const now = Date.now();
   if (current.lockedUntil > now) {
     const seconds = Math.ceil((current.lockedUntil - now) / 1000);
-    return json(429, { message: `Too many login attempts. Please try again in ${seconds} seconds.` }, { "retry-after": String(seconds) });
+    return json(429, { message: "Too Many Attempts." }, { "retry-after": String(seconds) });
   }
 
   const expected = credentials();
   if (email !== expected.email || password !== expected.password) {
     const failures = current.failures + 1;
-    if (failures >= MAX_FAILED_ATTEMPTS) {
-      attempts.set(email, { failures: 0, lockedUntil: now + LOCK_SECONDS * 1000 });
-      return json(429, { message: `Too many login attempts. Please try again in ${LOCK_SECONDS} seconds.` }, { "retry-after": String(LOCK_SECONDS) });
-    }
-    attempts.set(email, { failures, lockedUntil: 0 });
-    return json(422, {
-      message: "These credentials do not match our records.",
-      errors: { email: ["These credentials do not match our records."] },
-    });
+    const lockedUntil = failures >= MAX_FAILED_ATTEMPTS ? now + LOCK_SECONDS * 1000 : 0;
+    attempts.set(email, { failures: lockedUntil ? 0 : failures, lockedUntil });
+    // Mesma resposta do InvalidCredentialsException do back-end.
+    return json(422, { errors: { message: "Credenciais inválidas." } });
   }
 
   attempts.delete(email);
-  return json(200, { token: issueToken(), user: { ...MOCK_USER, email: expected.email } });
+  // Mesmo formato do AuthResource do back-end: { data: { token, user } }.
+  return json(200, { data: { token: issueToken(), user: userResource() } });
 }
 
 function handleLeadsList(params: URLSearchParams): MockResponse {
@@ -242,10 +246,11 @@ export async function mockApi(request: MockRequest): Promise<MockResponse> {
     return json(200, paginate(store().projects, params, "/api/projects"));
   }
 
-  if (!isValidToken(request.token)) return unauthenticated();
+  if (!request.trustToken && !isValidToken(request.token)) return unauthenticated();
+  if (request.trustToken && !request.token) return unauthenticated();
 
   if (resource === "logout" && method === "POST") return noContent();
-  if (resource === "me" && method === "GET") return json(200, { data: { ...MOCK_USER, email: credentials().email } });
+  if (resource === "me" && method === "GET") return json(200, { data: userResource() });
 
   if (resource === "leads") {
     if (segments.length === 1 && method === "GET") return handleLeadsList(params);

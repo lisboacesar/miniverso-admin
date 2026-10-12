@@ -3,6 +3,19 @@
 Mudanças do painel administrativo, da mais recente para a mais antiga.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). O detalhamento de cada entrega, com capturas de tela, está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md).
 
+## [0.1.1] - 2026-10-11
+
+### Alterado
+
+- Login, sessão e saída integrados ao back-end real (metaverso-back): rotas na raiz (`/login`, `/me`, `/logout`), resposta em `data` e usuário com o campo `nome`
+- Login só por e-mail, porque o back-end valida o campo como e-mail
+- Mock atualizado para responder igual ao back-end (mensagens, formato e limite de 6 tentativas por minuto)
+
+### Adicionado
+
+- Modo híbrido: com `API_MODE=live`, recursos que o back-end ainda não tem (`MOCK_RESOURCES`) continuam vindo do mock
+- Testes do modo live contra um servidor que imita o back-end
+
 ## [0.1.0] - 2026-10-11
 
 ### Adicionado

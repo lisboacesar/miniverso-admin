@@ -56,7 +56,8 @@ export function LoginForm({ reason, redirectTo }: LoginFormProps) {
     if (pending || locked) return;
 
     const errors: FieldErrors = {};
-    if (!login.trim()) errors.login = "Informe seu e-mail ou usuário.";
+    if (!login.trim()) errors.login = "Informe seu e-mail.";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(login.trim())) errors.login = "Digite um e-mail válido, como nome@empresa.com.";
     if (!password) errors.password = "Informe sua senha.";
     setFieldErrors(errors);
     setFormError(null);
@@ -112,7 +113,7 @@ export function LoginForm({ reason, redirectTo }: LoginFormProps) {
 
           <div className={styles.heading}>
             <h1 className={styles.title}>Entrar no painel</h1>
-            <p className={styles.subtitle}>Use o e-mail ou usuário e a senha de administrador.</p>
+            <p className={styles.subtitle}>Use o e-mail e a senha de administrador.</p>
           </div>
 
           {reasonMessage && !formError && <Alert tone={reasonMessage.tone}>{reasonMessage.text}</Alert>}
@@ -136,10 +137,9 @@ export function LoginForm({ reason, redirectTo }: LoginFormProps) {
             </p>
             <TextField
               ref={loginRef}
-              label="E-mail ou usuário"
+              label="E-mail"
               name="login"
-              type="text"
-              inputMode="email"
+              type="email"
               autoComplete="username"
               autoCapitalize="none"
               spellCheck={false}

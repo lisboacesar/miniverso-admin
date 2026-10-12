@@ -9,7 +9,7 @@ const login = (email: string, password: string) =>
 
 async function token(): Promise<string> {
   const response = await login("admin@miniverso.test", "miniverso123");
-  return (response.data as { token: string }).token;
+  return (response.data as { data: { token: string } }).data.token;
 }
 
 type Page = { data: Array<{ id: number; name: string; created_at: string; service: { id: number } | null }>; meta: { total: number; last_page: number } };
@@ -20,21 +20,24 @@ describe("mock da API", () => {
   it("faz login com as credenciais de teste", async () => {
     const response = await login("ADMIN@miniverso.test", "miniverso123");
     assert.equal(response.status, 200);
-    assert.match((response.data as { token: string }).token, /^mock\./);
+    const body = response.data as { data: { token: string; user: { nome: string } } };
+    assert.match(body.data.token, /^mock\./);
+    assert.equal(body.data.user.nome, "Administrador Miniverso");
   });
 
-  it("recusa senha errada com 422, como o Laravel", async () => {
+  it("recusa senha errada com 422 e a mesma mensagem do back-end", async () => {
     const response = await login("admin@miniverso.test", "errada");
     assert.equal(response.status, 422);
+    assert.deepEqual(response.data, { errors: { message: "Credenciais inválidas." } });
   });
 
-  it("bloqueia depois de 5 tentativas erradas (RNF15)", async () => {
-    for (let attempt = 1; attempt <= 4; attempt += 1) {
+  it("bloqueia na 7ª tentativa, como o throttle:6,1 do back-end (RNF15)", async () => {
+    for (let attempt = 1; attempt <= 6; attempt += 1) {
       assert.equal((await login("admin@miniverso.test", "errada")).status, 422);
     }
     const blocked = await login("admin@miniverso.test", "errada");
     assert.equal(blocked.status, 429);
-    assert.equal(blocked.headers.get("retry-after"), "60");
+    assert.ok(Number(blocked.headers.get("retry-after")) > 0);
     // Mesmo com a senha certa, continua bloqueado até o tempo acabar.
     assert.equal((await login("admin@miniverso.test", "miniverso123")).status, 429);
   });

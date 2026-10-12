@@ -1,48 +1,45 @@
 # Contrato da API usado pelo painel
 
-**Status: a confirmar com o back-end.** Este é o formato que o painel espera hoje e que o mock (`src/mock/mock-api.ts`) imita. Ele segue as convenções do Laravel (Sanctum, API Resources e paginação padrão), que é o back-end citado no artigo do projeto. Quando o contrato real for confirmado, ajuste:
+Back-end: **metaverso-back** (Laravel 12, Sanctum, MySQL). As rotas ficam na raiz, sem prefixo `/api`.
+
+| Parte | Situação |
+| --- | --- |
+| Autenticação (`/login`, `/me`, `/logout`) | **confirmada** no código do back-end e integrada na v0.1.1 |
+| Leads, serviços, projetos e conteúdo do site | **ainda não existem** no back-end; o painel usa o mock (`MOCK_RESOURCES`) no formato proposto abaixo |
+
+Onde ajustar se algo mudar:
 
 - nomes de rota e parâmetros: `src/features/*/api.ts` e `src/lib/server/auth.ts`
 - nomes de campos: `src/lib/api/mappers.ts`
 - recursos liberados na ponte: `src/lib/server/allowed-resources.ts`
 
-O navegador não chama estas rotas diretamente. Quem chama é o servidor do Next.js (BFF), com o token no cabeçalho `Authorization`.
+O navegador não chama estas rotas diretamente. Quem chama é o servidor do Next.js (BFF), com o token no cabeçalho `Authorization: Bearer <token>`.
 
-## Convenções
+## Autenticação (confirmada)
 
-- Base: `API_URL`, por exemplo `http://localhost:8000/api`
-- Formato: JSON (`Accept: application/json`)
-- Autenticação: `Authorization: Bearer <token>` em todas as rotas do painel (RNF13)
-- Recursos individuais vêm dentro de `{ "data": ... }`
-- Listas paginadas seguem o paginador do Laravel: `{ "data": [...], "links": {...}, "meta": {...} }`
-- Datas em ISO 8601 (`created_at`)
+### `POST /login` (público, `throttle:6,1`)
 
-## Autenticação
+Corpo: `{ "email": "dev@example.com", "password": "••••" }`. O campo `email` precisa ser um e-mail válido (3 a 255 caracteres).
 
-### `POST /login`
-
-Corpo:
-
-```json
-{ "email": "admin@miniverso.test", "password": "••••••" }
-```
-
-| Status | Significado | O painel mostra |
+| Status | Resposta do back-end | O painel mostra |
 | --- | --- | --- |
-| `200` | `{ "token": "...", "user": { "id": 1, "name": "...", "email": "..." } }` | entra no painel |
-| `401` ou `422` | credenciais erradas | "E-mail/usuário ou senha incorretos." (RNF16) |
-| `429` | bloqueio por tentativas, com cabeçalho `Retry-After` em segundos | aviso de bloqueio com contagem regressiva (RNF15) |
-| `5xx` ou sem resposta | servidor indisponível | "Não foi possível conectar ao servidor..." |
+| `200` | `{ "data": { "token": "...", "user": { "nome": "...", "email": "...", "created_at": "...", "updated_at": "..." } } }` | entra no painel |
+| `422` | `{ "errors": { "message": "Credenciais inválidas." } }` ou erros de validação | "E-mail ou senha incorretos." (RNF16) |
+| `429` | `{ "message": "Too Many Attempts." }` com `Retry-After` | aviso de bloqueio com contagem regressiva (RNF15) |
 
-O painel também aceita `access_token` no lugar de `token`. Se `user` não vier, ele busca em `GET /me`.
-
-### `POST /logout`
-
-Invalida o token atual (RNF14). Resposta esperada: `204`.
+Cada login revoga os tokens anteriores do usuário. O token expira em 24 horas (`config/sanctum.php`).
 
 ### `GET /me`
 
-Usuário dono do token: `{ "data": { "id": 1, "name": "...", "email": "..." } }`. Responde `401` se o token não vale mais; nesse caso o painel encerra a sessão e volta ao login com o aviso de sessão expirada.
+`{ "data": { "nome": "...", "email": "...", "created_at": "...", "updated_at": "..." } }`. Sem token válido: `401 { "message": "Não autenticado." }`, e o painel volta ao login com o aviso de sessão expirada. O `UserResource` não devolve `id`; o painel usa o e-mail como identificador.
+
+### `POST /logout`
+
+Revoga o token atual. Resposta `204`.
+
+## Formato proposto para as próximas rotas
+
+Segue o mesmo padrão do back-end atual: Resources dentro de `data` e paginação padrão do Laravel. É o que o mock implementa hoje.
 
 ## Leads (RF16, RF17)
 
@@ -101,10 +98,8 @@ O cadastro, a edição e a exclusão de serviços (RF13) e projetos (RF14) entra
 
 ## Perguntas para o back-end
 
-1. A rota de login é `POST /api/login` com `email` e `password`? Aceita usuário além de e-mail (RF11)?
-2. O token é do Sanctum? Ele expira sozinho depois de quanto tempo (RNF14)?
-3. O limite de tentativas (RNF15) usa o throttle do Laravel com `Retry-After`? Quantas tentativas e por quanto tempo?
-4. Os nomes de rota e de campos dos leads batem com este documento? O serviço de interesse vem como objeto (`service`) ou só como `service_id`?
-5. A rota do usuário logado é `/me` ou `/user` (padrão do Laravel)?
-6. Os parâmetros de busca, filtro, ordenação e data (`search`, `service_id`, `sort`, `from`) existem?
-7. O DRDA (3.1.3) cita Firebase como banco e o artigo cita Laravel no back-end. Qual é a combinação final? Para o painel, só importa o formato da API.
+1. Quando entram as rotas de leads, serviços, projetos e conteúdo? Os nomes de campo propostos aqui servem (o `UserResource` usa `nome` em português; vale padronizar o idioma dos campos)?
+2. O RF11 prevê login por e-mail ou usuário. O `LoginRequest` aceita só e-mail. Fica só e-mail e atualizamos o DRDA?
+3. O `throttle:6,1` conta por IP. Como o painel chama a API pelo servidor do Next.js, todos os acessos saem do mesmo IP. Dá para configurar o TrustProxies para ler o `X-Forwarded-For` do painel?
+4. A rota pública que recebe o formulário de contato do site (RF08) vai gravar os leads nesse mesmo recurso `leads`?
+5. O DRDA (3.1.3) cita Firebase como banco; o back-end usa MySQL. Vale atualizar o DRDA.

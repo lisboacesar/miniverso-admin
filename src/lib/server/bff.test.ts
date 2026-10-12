@@ -61,12 +61,12 @@ describe("POST /api/auth/login", () => {
 
   it("informa o bloqueio temporário com o tempo de espera (RNF15)", async () => {
     let response: Response = new Response();
-    for (let attempt = 1; attempt <= 5; attempt += 1) {
+    for (let attempt = 1; attempt <= 7; attempt += 1) {
       response = await login(loginRequest({ login: "admin@miniverso.test", password: "errada" }));
     }
     assert.equal(response.status, 429);
     const body = (await response.json()) as { retryAfterSeconds: number; message: string };
-    assert.equal(body.retryAfterSeconds, 60);
+    assert.ok(body.retryAfterSeconds > 0 && body.retryAfterSeconds <= 60);
     assert.match(body.message, /bloqueado por 1 minuto/);
   });
 

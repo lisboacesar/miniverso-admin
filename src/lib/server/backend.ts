@@ -52,6 +52,13 @@ export async function callBackend(request: BackendRequest): Promise<BackendRespo
     return mockApi({ ...request, method });
   }
 
+  // Modo híbrido: o login é real, mas recursos que o back-end ainda não tem vêm do mock.
+  // O token já foi validado pelo back-end real (/me no layout), então o mock confia nele.
+  const resource = request.path.split("/").filter(Boolean)[0] ?? "";
+  if (config.mockResources.has(resource)) {
+    return mockApi({ ...request, method, trustToken: true });
+  }
+
   if (!config.apiUrl) {
     throw new BackendUnavailableError(new Error("API_URL não configurada no .env.local"));
   }

@@ -32,6 +32,14 @@ describe("mappers", () => {
     });
   });
 
+  it("lê o usuário no formato do back-end (nome, sem id)", () => {
+    assert.deepEqual(mapUser({ nome: "Admin", email: "admin@example.com", created_at: "01/09/2026 10:00:00" }), {
+      id: "admin@example.com",
+      name: "Admin",
+      email: "admin@example.com",
+    });
+  });
+
   it("descarta itens sem id", () => {
     assert.equal(mapLead({ name: "Sem id" }), null);
     assert.equal(mapUser({ id: 1 }), null);

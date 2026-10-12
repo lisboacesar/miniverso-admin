@@ -26,12 +26,12 @@ export function unwrapData(payload: unknown): unknown {
   return isObject(payload) && "data" in payload ? payload.data : payload;
 }
 
+/** O back-end devolve { nome, email } (UserResource), sem id. O e-mail serve de identificador. */
 export function mapUser(raw: unknown): User | null {
   if (!isObject(raw)) return null;
-  const id = text(raw.id);
   const email = text(raw.email);
-  if (!id || !email) return null;
-  return { id, email, name: text(raw.name) ?? email };
+  if (!email) return null;
+  return { id: text(raw.id) ?? email, email, name: text(raw.nome) ?? text(raw.name) ?? email };
 }
 
 export function mapLead(raw: unknown): Lead | null {

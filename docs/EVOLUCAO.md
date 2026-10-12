@@ -11,10 +11,39 @@ Cada entrega ganha uma entrada neste arquivo, com o que mudou, os requisitos do 
 | Versão | Data | Entrega | Situação |
 | --- | --- | --- | --- |
 | 0.1.0 | 11/10/2026 | Base do painel, login, sessão, visão geral e leads | entregue |
+| 0.1.1 | 11/10/2026 | Login e sessão integrados ao back-end real | entregue |
 | 0.2.0 | a definir | Serviços: cadastrar, editar e remover | planejada |
 | 0.3.0 | a definir | Projetos: cadastrar, editar, remover e enviar imagens | planejada |
 | 0.4.0 | a definir | Conteúdo do site: textos e imagens da página inicial | planejada |
 | 0.5.0 | a definir | Ajustes finais, testes com pessoas de fora da equipe e publicação | planejada |
+
+---
+
+## v0.1.1 · 11/10/2026 · Integração da autenticação com o back-end
+
+### O que mudou
+
+- O painel passou a autenticar no back-end real (metaverso-back, Laravel 12 com Sanctum): `POST /login`, `GET /me` e `POST /logout`.
+- Ajustes ao contrato real: rotas sem o prefixo `/api`, resposta dentro de `data` e nome do usuário no campo `nome`.
+- O campo de login aceita só e-mail, como a validação do back-end (`LoginRequest`).
+- Modo híbrido: leads, serviços, projetos e conteúdo ainda não existem no back-end e continuam vindo do mock até as rotas serem criadas.
+- 43 testes passando, incluindo o modo live contra um servidor que responde como o back-end.
+
+### Requisitos reforçados
+
+| Requisito | Como |
+| --- | --- |
+| RF11, RNF10 | Login validado no back-end com senha em hash (RNF11 é do back-end) |
+| RNF12, RNF13 | Token do Sanctum guardado em cookie httpOnly e enviado como Bearer |
+| RNF14 | Logout revoga o token (`currentAccessToken()->delete()`); o token expira em 24 h no back-end e a sessão do painel em 8 h ou 30 min sem uso |
+| RNF15 | Bloqueio pelo `throttle:6,1` do back-end, exibido com contagem regressiva |
+| RNF16 | O 422 "Credenciais inválidas." vira a mensagem genérica do painel |
+
+### Pendências
+
+- Rotas de leads, serviços, projetos e conteúdo no back-end.
+- O `throttle:6,1` conta tentativas por IP. Como o painel chama a API pelo servidor do Next.js, todos os acessos saem do mesmo IP. Para um único administrador funciona, mas vale o back-end confiar no cabeçalho `X-Forwarded-For` do painel (TrustProxies).
+- RF11 pede login por e-mail ou usuário; o back-end aceita só e-mail. Atualizar o DRDA ou o back-end.
 
 ---
 

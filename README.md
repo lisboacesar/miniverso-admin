@@ -3,7 +3,7 @@
 Front-end do painel administrativo do portfólio institucional da Miniverso, em **Next.js 16** e **React 19**.
 Projeto da disciplina Programação Avançada para Web (UNDB, Prof. Me. Kleydson Beckman).
 
-Versão atual: **0.1.0**. O histórico de entregas está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md).
+Versão atual: **0.1.1**. O histórico de entregas está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md).
 
 ## O que já funciona
 
@@ -33,18 +33,18 @@ Sem back-end configurado, o painel usa dados de exemplo (modo mock), no mesmo fo
 | E-mail | `admin@miniverso.test` |
 | Senha | `miniverso123` |
 
-Errar a senha 5 vezes bloqueia o acesso por 1 minuto, como o back-end deve fazer (RNF15).
+Na 7ª tentativa em 1 minuto o acesso é bloqueado, igual ao `throttle:6,1` do back-end (RNF15).
 
-### Conectar ao back-end
+### Conectar ao back-end (metaverso-back)
 
-No `.env.local`:
+Suba o back-end com o Sail (ver o README dele) e crie um usuário administrador. No `.env.local` do painel:
 
 ```bash
-API_URL=http://localhost:8000/api
+API_URL=http://localhost:8000
 API_MODE=live
 ```
 
-As rotas que o painel espera estão em [docs/CONTRATO-API.md](docs/CONTRATO-API.md). Se o back-end usar outros nomes de rota ou de campo, os ajustes ficam em `src/lib/api/mappers.ts` e em `src/features/*/api.ts`.
+O login, a sessão e a saída passam a usar a API real. Leads, serviços, projetos e conteúdo ainda não existem no back-end, então continuam vindo do mock (variável `MOCK_RESOURCES`). Quando uma rota for criada lá, tire o nome dela dessa lista. O contrato está em [docs/CONTRATO-API.md](docs/CONTRATO-API.md).
 
 ## Scripts
 
@@ -54,7 +54,7 @@ As rotas que o painel espera estão em [docs/CONTRATO-API.md](docs/CONTRATO-API.
 | `npm run build` | build de produção, com checagem de tipos |
 | `npm start` | roda o build de produção |
 | `npm run lint` | ESLint com as regras do Next.js |
-| `npm test` | testes da camada de dados e de segurança |
+| `npm test` | testes da camada de dados, de segurança e do contrato com o back-end |
 
 ## Arquitetura
 

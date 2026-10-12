@@ -4,8 +4,8 @@
  * códigos de erro ou mensagens vindas direto do servidor.
  */
 export const MESSAGES = {
-  loginInvalid: "E-mail/usuário ou senha incorretos.",
-  loginMissing: "Preencha o e-mail ou usuário e a senha.",
+  loginInvalid: "E-mail ou senha incorretos.",
+  loginMissing: "Preencha o e-mail e a senha.",
   loginLocked: (minutes: number) =>
     `Muitas tentativas sem sucesso. Por segurança, o acesso foi bloqueado por ${minutes} ${
       minutes === 1 ? "minuto" : "minutos"
