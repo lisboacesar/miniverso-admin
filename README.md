@@ -4,7 +4,7 @@ Front-end do painel administrativo do portfólio institucional da Miniverso, em 
 Esta parte do projeto é o **editor da página inicial** (frame "Painel · Editor da página inicial" no Figma), onde o administrador muda a estrutura e o conteúdo da home do site, e a consulta de **leads** recebidos pelo formulário de contato (seção "Painel · Leads" no Figma).
 Projeto da disciplina Programação Avançada para Web (UNDB, Prof. Me. Kleydson Beckman).
 
-Versão atual: **0.4.0**. O histórico de entregas está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md) e as ideias fora do DRDA, em [docs/PROPOSTAS.md](docs/PROPOSTAS.md).
+Versão atual: **0.4.1**. O histórico de entregas está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md) e as ideias fora do DRDA, em [docs/PROPOSTAS.md](docs/PROPOSTAS.md).
 
 ## O que já funciona
 
@@ -62,7 +62,7 @@ O login, a sessão e a saída passam a usar a API real. O conteúdo da página i
 | `npm run dev` | servidor de desenvolvimento |
 | `npm run build` | build de produção, com checagem de tipos |
 | `npm start` | roda o build de produção |
-| `npm run lint` | ESLint com as regras do Next.js |
+| `npm run lint` | ESLint com as regras do Next.js e do React (inclui as regras do React Compiler) |
 | `npm test` | testes da camada de dados, de segurança e do contrato com o back-end |
 
 ## Arquitetura
@@ -93,7 +93,7 @@ src/
 │  ├─ admin/(painel)/    telas protegidas (pagina-inicial e leads)
 │  └─ api/               rotas do BFF (auth e ponte para a API)
 ├─ components/
-│  ├─ layout/            menu lateral, cabeçalho e menu da conta
+│  ├─ layout/            menu lateral, cabeçalho, botão de tema e menu da conta
 │  └─ ui/                botão, campos, switch, modais, toasts, estados vazios e de erro
 ├─ features/
 │  ├─ auth/              login e saída por inatividade

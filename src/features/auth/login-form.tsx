@@ -39,13 +39,22 @@ export function LoginForm({ reason, redirectTo }: LoginFormProps) {
   const [formError, setFormError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [lockSeconds, setLockSeconds] = useState(0);
+  const [lockEnded, setLockEnded] = useState(false);
   const loginRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
   // Contagem regressiva do bloqueio temporário (RNF15).
   useEffect(() => {
     if (lockSeconds <= 0) return;
-    const timer = window.setTimeout(() => setLockSeconds((current) => Math.max(0, current - 1)), 1000);
+    const timer = window.setTimeout(() => {
+      const next = lockSeconds - 1;
+      setLockSeconds(next);
+      if (next === 0) {
+        // Fim do bloqueio: o aviso de bloqueio sai e a tela diz que já dá para tentar de novo.
+        setFormError(null);
+        setLockEnded(true);
+      }
+    }, 1000);
     return () => window.clearTimeout(timer);
   }, [lockSeconds]);
 
@@ -61,6 +70,7 @@ export function LoginForm({ reason, redirectTo }: LoginFormProps) {
     if (!password) errors.password = "Informe sua senha.";
     setFieldErrors(errors);
     setFormError(null);
+    setLockEnded(false);
     if (errors.login || errors.password) {
       // Leva o foco ao primeiro campo com problema (RNF30).
       (errors.login ? loginRef : passwordRef).current?.focus();
@@ -101,7 +111,9 @@ export function LoginForm({ reason, redirectTo }: LoginFormProps) {
         </div>
         <div className={styles.asideBody}>
           <p className={styles.asideTitle}>A página inicial do site, editável num só lugar.</p>
-          <p className={styles.asideText}>Organize as seções da página inicial e atualize textos, imagens, serviços e projetos.</p>
+          <p className={styles.asideText}>
+            Organize as seções da página inicial, atualize textos, imagens, serviços e projetos e acompanhe os contatos recebidos pelo site.
+          </p>
         </div>
         <span className={styles.asideFooter}>Acesso restrito à equipe da Miniverso</span>
       </aside>
@@ -118,7 +130,9 @@ export function LoginForm({ reason, redirectTo }: LoginFormProps) {
             <p className={styles.subtitle}>Use o e-mail e a senha de administrador.</p>
           </div>
 
-          {reasonMessage && !formError && <Alert tone={reasonMessage.tone}>{reasonMessage.text}</Alert>}
+          {reasonMessage && !formError && !lockEnded && <Alert tone={reasonMessage.tone}>{reasonMessage.text}</Alert>}
+
+          {lockEnded && !formError && <Alert tone="info">O bloqueio terminou. Você já pode tentar entrar de novo.</Alert>}
 
           {formError && (
             <Alert tone={locked ? "warning" : "error"} title={locked ? "Acesso bloqueado temporariamente" : undefined}>
@@ -126,7 +140,10 @@ export function LoginForm({ reason, redirectTo }: LoginFormProps) {
               {locked && (
                 <>
                   {" "}
-                  Tente de novo em <strong>{formatCountdown(lockSeconds)}</strong>.
+                  {/* A contagem muda a cada segundo: fica fora do leitor de tela para não ser anunciada sem parar */}
+                  <span aria-hidden="true">
+                    Tente de novo em <strong>{formatCountdown(lockSeconds)}</strong>.
+                  </span>
                 </>
               )}
             </Alert>

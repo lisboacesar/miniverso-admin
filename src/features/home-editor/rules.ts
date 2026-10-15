@@ -24,6 +24,14 @@ export function isValidUrl(value: string): boolean {
   }
 }
 
+/** Campo obrigatório vazio: diz o que fazer e em qual campo, pelo rótulo visível (RNF30). */
+function requiredMessage(def: FieldDef): string {
+  if (def.type === "image") return `Escolha uma imagem para o campo "${def.label}".`;
+  if (def.type === "file") return `Escolha um arquivo para o campo "${def.label}".`;
+  if (def.type === "select") return `Escolha uma opção no campo "${def.label}".`;
+  return `Preencha o campo "${def.label}".`;
+}
+
 /** Erros de cada campo, com mensagem que diz o problema (RNF30). */
 export function validateFields(defs: FieldDef[], values: Record<string, FieldValue | undefined>): FieldErrors {
   const errors: FieldErrors = {};
@@ -31,9 +39,7 @@ export function validateFields(defs: FieldDef[], values: Record<string, FieldVal
     const value = values[def.name];
     if (def.type === "toggle" || def.type === "checkbox") continue;
     if (isBlank(value)) {
-      if (def.required) {
-        errors[def.name] = def.type === "image" || def.type === "file" ? `Envie ${def.label.toLowerCase()}.` : `Preencha ${def.label.toLowerCase()}.`;
-      }
+      if (def.required) errors[def.name] = requiredMessage(def);
       continue;
     }
     const text = String(value).trim();

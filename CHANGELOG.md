@@ -3,6 +3,31 @@
 Mudanças do painel administrativo, da mais recente para a mais antiga.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). O detalhamento de cada entrega, com capturas de tela, está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md).
 
+## [0.4.1] - 2026-10-15
+
+Revisão completa do painel, do código ao Figma. Detalhes e método em [docs/EVOLUCAO.md](docs/EVOLUCAO.md).
+
+### Corrigido
+
+- Editor: o carregamento do conteúdo não chama mais `setState` direto dentro do efeito; "Tentar de novo" volta ao estado de carregamento antes de pedir o conteúdo. Era o único erro da regra `react-hooks/set-state-in-effect`, que o `npm run lint` aponta com o eslint-config-next 16
+- Login: no fim da contagem do bloqueio, o aviso de bloqueio sai e aparece "O bloqueio terminou. Você já pode tentar entrar de novo." Antes, a mensagem de bloqueio continuava na tela, em vermelho
+- Login: a contagem regressiva não é mais anunciada pelo leitor de tela a cada segundo; ele lê a mensagem com a duração do bloqueio
+- Celular: ao abrir o menu em gaveta, o foco vai para "Fechar menu"; ao fechar (botão, Esc ou toque fora), volta para "Abrir menu". Com o menu aberto, o resto da tela fica inativo para o teclado. Se a tela crescer até o layout com menu fixo, a gaveta fecha sozinha
+- Celular: o nome do lead no cartão, que abre o detalhe, tem área de toque de 44 px; antes tinha 24 px (RNF40)
+- Celular: a caixa de autorização do logo, junto com o rótulo, chega a 44 px de altura; antes tinha 42 px (RNF40)
+- Switch de visibilidade no editor de seção: o nome lido pelo leitor de tela não muda mais com o estado ("Exibir Diferenciais na página", ligado ou desligado). O texto visível continua dizendo "Visível na página" ou "Oculta na página"
+- Mensagens de campo obrigatório citam o campo pelo rótulo: `Preencha o campo "Título".`, `Escolha uma imagem para o campo "Capa".` e `Escolha uma opção no campo "Categoria".` (RNF30). Antes: "Preencha título." e "Envie capa."
+- A mensagem de erro da caixa de seleção passou a ser ligada ao campo (`aria-describedby`)
+
+### Alterado
+
+- A lateral do login também cita os contatos recebidos pelo site
+- Figma: cinco cores do modo Claro da coleção "Painel · Cores" ficaram mais escuras para todo texto passar de 4,5:1 (RNF33), e o botão "Salvando..." deixou de ser transparente, como no código
+
+### Removido
+
+- Classes CSS sem uso (`brandName`) no menu lateral e no login
+
 ## [0.4.0] - 2026-10-15
 
 Modo escuro no painel e no Figma. Detalhes em [docs/EVOLUCAO.md](docs/EVOLUCAO.md).

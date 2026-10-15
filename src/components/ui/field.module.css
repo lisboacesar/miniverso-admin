@@ -158,9 +158,17 @@
   grid-column: 1 / -1;
 }
 
+/* O rótulo também marca a caixa: com ele, a área de toque chega a 44 px (RNF40) */
+.checkboxField > label {
+  min-height: 44px;
+  padding-top: 2px;
+  cursor: pointer;
+}
+
 .checkbox {
   width: 20px;
   height: 20px;
-  margin: 1px 0 0;
+  margin: 3px 0 0;
   accent-color: var(--color-primary);
+  cursor: pointer;
 }

@@ -26,8 +26,11 @@ describe("regras do editor da página inicial", () => {
   });
 
   it("pede os campos obrigatórios com mensagem que diz o problema (RNF30)", () => {
-    const errors = validateFields(SECTION_BY_KEY.hero.fields, { title: "", primaryLabel: "Ver", primaryTarget: "projetos" });
-    assert.equal(errors.title, "Preencha chamada principal.");
+    const errors = validateFields(SECTION_BY_KEY.hero.fields, { title: "", primaryLabel: "Ver", primaryTarget: "" });
+    assert.equal(errors.title, 'Preencha o campo "Chamada principal".');
+    assert.equal(errors.primaryTarget, 'Escolha uma opção no campo "Botão principal · destino".');
+    const service = validateFields(SECTION_BY_KEY.servicos.items!.fields, { title: "RV", description: "Treinamentos" });
+    assert.equal(service.image, 'Escolha uma imagem para o campo "Ícone ou imagem".');
   });
 
   it("confere limite de caracteres, link e e-mail", () => {

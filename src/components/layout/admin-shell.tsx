@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { LuExternalLink, LuMenu, LuX } from "react-icons/lu";
 import { requestLogout } from "@/features/auth/api";
 import { useIdleLogout } from "@/features/auth/use-idle-logout";
@@ -28,20 +28,40 @@ type AdminShellProps = {
 export function AdminShell({ user, siteUrl, idleTimeoutMinutes, children }: AdminShellProps) {
   const pathname = usePathname();
   const [navOpen, setNavOpen] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeNavRef = useRef<HTMLButtonElement>(null);
+  const navWasOpen = useRef(false);
 
   useIdleLogout(idleTimeoutMinutes, () => {
     const here = window.location.pathname + window.location.search;
     void requestLogout().finally(() => window.location.assign(loginRedirectFor(here, "inatividade")));
   });
 
-  // Esc fecha o menu no celular.
+  // Menu em gaveta no celular: o foco entra no menu ao abrir e volta ao botão ao fechar.
+  // Esc fecha; se a tela crescer até o layout com menu fixo, a gaveta fecha sozinha.
   useEffect(() => {
-    if (!navOpen) return;
+    if (!navOpen) {
+      if (navWasOpen.current) {
+        navWasOpen.current = false;
+        menuButtonRef.current?.focus();
+      }
+      return;
+    }
+    navWasOpen.current = true;
+    closeNavRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setNavOpen(false);
     };
+    const wide = window.matchMedia("(min-width: 768px)");
+    const onResize = () => {
+      if (wide.matches) setNavOpen(false);
+    };
     window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    wide.addEventListener("change", onResize);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      wide.removeEventListener("change", onResize);
+    };
   }, [navOpen]);
 
   return (
@@ -58,7 +78,7 @@ export function AdminShell({ user, siteUrl, idleTimeoutMinutes, children }: Admi
             <img src="/brand/logo-branca-horizontal.svg" alt="Miniverso" className={styles.brandLogo} width={160} height={27} />
             <span className={styles.brandSub}>Painel administrativo</span>
           </div>
-          <button type="button" className={styles.closeNav} aria-label="Fechar menu" onClick={() => setNavOpen(false)}>
+          <button ref={closeNavRef} type="button" className={styles.closeNav} aria-label="Fechar menu" onClick={() => setNavOpen(false)}>
             <LuX aria-hidden="true" />
           </button>
         </div>
@@ -89,9 +109,11 @@ export function AdminShell({ user, siteUrl, idleTimeoutMinutes, children }: Admi
 
       {navOpen && <div className={styles.scrim} aria-hidden="true" onClick={() => setNavOpen(false)} />}
 
-      <div className={styles.main}>
+      {/* Com o menu aberto no celular, o resto da tela fica inativo: o teclado não alcança o que está atrás da gaveta */}
+      <div className={styles.main} inert={navOpen || undefined}>
         <header className={styles.header}>
           <button
+            ref={menuButtonRef}
             type="button"
             className={styles.menuButton}
             aria-label="Abrir menu"

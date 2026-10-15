@@ -59,8 +59,8 @@ export function SectionEditor({
           <Switch
             checked={section.visible}
             onChange={onToggleVisible}
-            label={section.visible ? "Visível na página" : "Oculta na página"}
-            showLabel
+            label={`Exibir ${def.name} na página`}
+            stateText={section.visible ? "Visível na página" : "Oculta na página"}
             disabled={!control.canToggle}
             disabledReason={control.reason}
           />

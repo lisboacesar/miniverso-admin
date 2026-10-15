@@ -28,7 +28,7 @@ export function DeleteLeadDialog({ lead, onClose, onDeleted }: DeleteLeadDialogP
       onDeleted(lead);
     } catch (caught) {
       setPending(false);
-      // Se outra pessoa já tinha excluído, o resultado é o mesmo: o lead não existe mais.
+      // Se o lead já tinha sido excluído (em outra aba, por exemplo), o resultado é o mesmo: ele não existe mais.
       if (caught instanceof ApiError && caught.status === 404) {
         onDeleted(lead);
         return;

@@ -195,10 +195,17 @@ export function CheckboxField({ label, error, id, ...input }: CheckboxProps) {
   const fieldId = id ?? generatedId;
   return (
     <div className={styles.checkboxField}>
-      <input id={fieldId} type="checkbox" className={styles.checkbox} aria-invalid={error ? true : undefined} {...input} />
+      <input
+        id={fieldId}
+        type="checkbox"
+        className={styles.checkbox}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${fieldId}-erro` : undefined}
+        {...input}
+      />
       <label htmlFor={fieldId}>{label}</label>
       {error && (
-        <p className={styles.error}>
+        <p id={`${fieldId}-erro`} className={styles.error}>
           <LuCircleAlert aria-hidden="true" />
           <span>{error}</span>
         </p>

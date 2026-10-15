@@ -48,9 +48,9 @@ export function HomeEditor({ siteUrl }: { siteUrl: string }) {
   const editorRef = useRef<HTMLDivElement>(null);
   const scrollToEditor = useRef(false);
 
+  // O estado começa em "loading"; "Tentar de novo" volta para ele antes de pedir de novo.
   useEffect(() => {
     const controller = new AbortController();
-    setLoad({ status: "loading" });
     getSiteContent(controller.signal)
       .then((content) => {
         setPublished(content);
@@ -90,7 +90,15 @@ export function HomeEditor({ siteUrl }: { siteUrl: string }) {
 
   if (load.status === "loading" || !draft || !published) {
     if (load.status === "error") {
-      return <ErrorState message={load.message} onRetry={() => setReloadKey((key) => key + 1)} />;
+      return (
+        <ErrorState
+          message={load.message}
+          onRetry={() => {
+            setLoad({ status: "loading" });
+            setReloadKey((key) => key + 1);
+          }}
+        />
+      );
     }
     return <EditorSkeleton />;
   }
@@ -274,7 +282,14 @@ export function HomeEditor({ siteUrl }: { siteUrl: string }) {
                 options={resolveOptions(field.options, content)}
                 onChange={(value) => {
                   setItemDraft((current) => (current ? { ...current, values: { ...current.values, [field.name]: value } } : current));
-                  if (itemErrors[field.name]) setItemErrors(({ [field.name]: _removed, ...rest }) => rest);
+                  if (itemErrors[field.name]) {
+                    // O erro do campo some quando ele é editado
+                    setItemErrors((current) => {
+                      const next = { ...current };
+                      delete next[field.name];
+                      return next;
+                    });
+                  }
                 }}
               />
             ))}

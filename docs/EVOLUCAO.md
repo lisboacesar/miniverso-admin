@@ -15,8 +15,83 @@ Cada entrega ganha uma entrada neste arquivo, com o que mudou, os requisitos do 
 | 0.2.0 | 12/10/2026 | Editor da página inicial (escopo corrigido) | entregue com mock |
 | 0.3.0 | 15/10/2026 | Revisão dos comentários do João: leads, imagem de fundo e propostas | entregue com mock |
 | 0.4.0 | 15/10/2026 | Modo escuro no painel e no Figma | entregue com mock |
+| 0.4.1 | 15/10/2026 | Revisão completa: lint, acessibilidade e contraste no Figma | entregue com mock |
 | 0.5.0 | a definir | Editor e leads ligados às rotas reais e envio de imagens | depende do back-end |
 | 0.6.0 | a definir | Ajustes finais, testes com pessoas de fora da equipe e publicação | planejada |
+
+---
+
+## v0.4.1 · 15/10/2026 · Revisão completa
+
+### Como foi revisado
+
+- **Código**: leitura de todos os arquivos de `src`. Checagem de tipos com os tipos reais do React 19 e do react-icons 5.7; o Next.js entrou com tipos mínimos, porque o pacote não está disponível no ambiente de revisão.
+- **Lint**: o registro do npm está bloqueado no ambiente de revisão, então o `npm run lint` não rodou. As regras do eslint-config-next 16 e do eslint-plugin-react-hooks 7.1.1 (versão do `package-lock.json`) foram lidas no código-fonte delas e conferidas uma a uma no código do painel.
+- **Fluxos no navegador**, de ponta a ponta, em quatro combinações de tema (claro, escuro pelo botão, escuro do sistema e claro escolhido com o sistema escuro) e em 1440, 1024 e 390 px: login, bloqueio e fim do bloqueio, retorno à página pedida, redirecionamento externo recusado, saída, sessão vencida ao abrir e durante o uso, editor (alterar, publicar, descartar, validação, envio de imagem, remover, reordenar, seções bloqueadas, falha de rede, erro ao carregar e tentar de novo) e leads (paginação, busca sem acento, filtro, ordem, detalhe, copiar, excluir, não encontrado, erro, vazio e carregando). 73 a 74 verificações por combinação, todas passando.
+- **Auditoria automática em 43 estados por combinação de tema**: nome acessível de todo controle, alvo de toque de 44 px no celular, contraste de todo texto visível e rolagem lateral.
+- **Inatividade**: sessão encerrada com o tempo reduzido para 3 e 30 segundos, inclusive com uso só em outra aba (a aba parada continua aberta enquanto a outra está em uso).
+- **Figma**: os 32 quadros do painel conferidos quanto a texto cortado, fonte ausente, sobreposição e cor sem variável, e o contraste de 1.669 textos calculado contra a cor que está atrás de cada um.
+
+### O que foi encontrado e corrigido
+
+| Problema | Correção | Requisito |
+| --- | --- | --- |
+| O editor chamava `setState` direto dentro do efeito de carregamento: erro da regra `react-hooks/set-state-in-effect` no `npm run lint` | O estado começa em "carregando" e "Tentar de novo" volta a ele antes de pedir o conteúdo | qualidade do código |
+| Variável sem uso (`_removed`) ao limpar o erro de um campo: aviso do lint | Cópia do objeto sem o campo | qualidade do código |
+| No fim do bloqueio, a mensagem "o acesso foi bloqueado" continuava na tela, em vermelho | Aviso "O bloqueio terminou. Você já pode tentar entrar de novo." | RNF15, RNF29 |
+| A contagem regressiva ficava numa região anunciada pelo leitor de tela: seria lida a cada segundo | A contagem fica oculta para o leitor de tela; ele lê a mensagem com a duração | RNF15 |
+| Menu em gaveta no celular sem controle de foco: ao abrir, o foco ficava atrás da gaveta | O foco entra no menu, volta ao botão ao fechar e o resto da tela fica inativo com o menu aberto | RNF35 |
+| Nome do lead no cartão do celular com 24 px de altura de toque | 44 px | RNF40 |
+| Caixa de autorização do logo, com o rótulo, com 42 px de altura de toque | 44 px | RNF40 |
+| Switch da seção com nome que mudava com o estado: o leitor dizia "Oculta na página, desligado" | Nome fixo ("Exibir Diferenciais na página") e estado em texto visível | RNF39 |
+| Mensagens de obrigatório sem artigo nem destaque do campo ("Preencha título.", "Envie capa.") | `Preencha o campo "Título".`, `Escolha uma imagem para o campo "Capa".` | RNF30 |
+| Erro da caixa de seleção sem ligação com o campo | `aria-describedby` no campo | RNF30 |
+| Lateral do login sem citar os leads, que voltaram na v0.3.0 | Texto atualizado | RNF27 |
+| Classes CSS sem uso (`brandName`) | Removidas | qualidade do código |
+
+### O que mudou no Figma
+
+- **Contraste do modo Claro (RNF33)**: 455 dos 1.669 textos ficavam abaixo do mínimo, quase todos com as cores herdadas do wireframe. Cinco cores do modo Claro da coleção "Painel · Cores" ficaram mais escuras, sem trocar o tom: texto secundário `#666e7d` → `#5b6275`, texto de apoio `#99a1ad` → `#636b7b`, azul de texto `#1a66ed` → `#2450e6` (o azul da marca), sucesso `#148c52` → `#127a46` e erro `#cc2e2e` → `#b42318`. Agora todos os textos passam de 4,5:1, menos as alças de arrastar do Hero e do Rodapé, que estão inativas.
+- **Botão "Salvando..."** do quadro "Estados e feedback" (claro e escuro) deixou de ser transparente, como no código: o botão em carregamento mantém a cor e o contraste (RNF08).
+- **Tabela de variáveis**: valores do modo Claro e nota sobre o ajuste atualizados.
+- Sem texto cortado, fonte ausente, sobreposição de quadros nem cor fora das variáveis.
+
+### Requisitos atendidos
+
+| Requisito | Como foi atendido |
+| --- | --- |
+| RNF15, RNF29 | Bloqueio com contagem visível e aviso quando termina |
+| RNF30 | Mensagem de obrigatório cita o campo pelo rótulo visível |
+| RNF33 | Todo texto acima do mínimo: no código, em 43 estados nas quatro combinações de tema; no Figma, nos dois modos |
+| RNF35 | Foco entra e sai do menu em gaveta; o teclado não alcança o que está atrás dele |
+| RNF39 | Estado do switch em texto visível, com nome fixo para o leitor de tela |
+| RNF40 | Nome do lead e caixa de autorização com 44 px no celular |
+
+### Capturas de tela
+
+Capturas da v0.4.1 em modo mock, com dados fictícios. No ambiente de captura as fontes do Google não carregam, então aparecem as fontes de reserva.
+
+| | |
+| --- | --- |
+| ![Fim do bloqueio](prints/v0.4.1/01-login-fim-do-bloqueio.png) Aviso de fim do bloqueio | ![Campos obrigatórios](prints/v0.4.1/02-campos-obrigatorios.png) Mensagens de campo obrigatório |
+| ![Seção bloqueada](prints/v0.4.1/03-secao-bloqueada-escuro.png) Switch com estado em texto | ![Menu no celular](prints/v0.4.1/04-celular-menu-foco.png) Foco no menu aberto pelo teclado |
+| ![Leads no celular](prints/v0.4.1/05-celular-leads.png) Cartões de leads | ![Logo no celular](prints/v0.4.1/06-celular-formulario-logo.png) Caixa de autorização |
+| ![Figma, editor](prints/v0.4.1/07-figma-editor-claro.png) Figma: editor no modo Claro ajustado | ![Figma, estados](prints/v0.4.1/08-figma-estados-claro.png) Figma: estados, com "Salvando..." sem transparência |
+
+### Testes
+
+- `npm test`: 73 testes passando. O teste de campos obrigatórios passou a conferir as três mensagens novas (texto, opção e imagem).
+- Capturas dos 29 estados da v0.4.0 comparadas pixel a pixel: só mudaram a lateral do login e as mensagens do formulário em modal, como previsto. No resto, a única diferença foram 40 pixels de borda com variação imperceptível de suavização.
+
+### Pontos de atenção
+
+- **Rodar `npm run lint` e `npm run build` no computador da equipe** antes da entrega, porque no ambiente de revisão o registro do npm está bloqueado. A revisão das regras foi feita lendo o código, sem executar o ESLint.
+- **Contorno dos campos no Figma**: os campos usam a borda `#d4d9e0`, mais clara que no código (`#7a8296`). O RNF33 trata de texto, mas a WCAG pede 3:1 no contorno de campos. Fica como sugestão para o grupo.
+- O Figma continua com as alças de "Arraste para reordenar"; o código usa setas (decisão da v0.2.0).
+
+### Próximo passo
+
+Ligar o editor e os leads às rotas reais quando o back-end criar `/site-content`, `/leads` e o envio de imagens (v0.5.0).
 
 ---
 
