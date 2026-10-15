@@ -9,6 +9,20 @@ const IMAGE: Pick<FieldDef, "accept" | "maxSizeMb"> = {
   maxSizeMb: 2,
 };
 
+/**
+ * Imagem de fundo opcional da seção (RF15: imagens institucionais).
+ * É decorativa: não precisa de texto alternativo. A página pública aplica uma
+ * camada sobre a imagem para o texto continuar legível (RNF33).
+ */
+const BACKGROUND: FieldDef = {
+  name: "background",
+  label: "Imagem de fundo (opcional)",
+  type: "image",
+  ...IMAGE,
+  decorative: true,
+  hint: "Fica atrás do conteúdo da seção. É decorativa, então não precisa de texto alternativo.",
+};
+
 export const SECTION_DEFS: SectionDef[] = [
   {
     key: "hero",
@@ -49,6 +63,7 @@ export const SECTION_DEFS: SectionDef[] = [
     fields: [
       { name: "title", label: "Título", type: "text", required: true, maxLength: 80 },
       { name: "text", label: "Texto institucional", type: "textarea", required: true, maxLength: 400, hint: "Textos curtos e de fácil leitura (RIU11, RNF27)." },
+      BACKGROUND,
     ],
     items: {
       singular: "destaque",
@@ -71,6 +86,7 @@ export const SECTION_DEFS: SectionDef[] = [
     fields: [
       { name: "title", label: "Título da seção", type: "text", required: true, maxLength: 80, half: true },
       { name: "subtitle", label: "Subtítulo", type: "text", maxLength: 120, half: true },
+      BACKGROUND,
     ],
     items: {
       singular: "serviço",
@@ -99,6 +115,7 @@ export const SECTION_DEFS: SectionDef[] = [
       { name: "title", label: "Título da seção", type: "text", required: true, maxLength: 80, half: true },
       { name: "subtitle", label: "Subtítulo", type: "text", maxLength: 120, half: true },
       { name: "featured", label: "Projeto em destaque", type: "select", required: true, options: "projects", hint: "Exibido com maior destaque antes da grade (RIU17)." },
+      BACKGROUND,
     ],
     items: {
       singular: "projeto",
@@ -128,7 +145,7 @@ export const SECTION_DEFS: SectionDef[] = [
     description: "Características da empresa, em formato visual e objetivo.",
     requirement: "optional",
     reqs: "RIU19",
-    fields: [{ name: "title", label: "Título da seção", type: "text", required: true, maxLength: 80 }],
+    fields: [{ name: "title", label: "Título da seção", type: "text", required: true, maxLength: 80 }, BACKGROUND],
     items: {
       singular: "diferencial",
       title: "Itens",
@@ -147,6 +164,7 @@ export const SECTION_DEFS: SectionDef[] = [
     fields: [
       { name: "title", label: "Título da seção", type: "text", required: true, maxLength: 80 },
       { name: "text", label: "Texto de apoio", type: "textarea", maxLength: 200 },
+      BACKGROUND,
     ],
   },
   {
@@ -158,6 +176,7 @@ export const SECTION_DEFS: SectionDef[] = [
     fields: [
       { name: "title", label: "Título da seção", type: "text", required: true, maxLength: 80, half: true },
       { name: "subtitle", label: "Subtítulo", type: "text", maxLength: 120, half: true },
+      BACKGROUND,
     ],
     items: {
       singular: "etapa",
@@ -178,7 +197,7 @@ export const SECTION_DEFS: SectionDef[] = [
     description: "Logos de empresas e parceiros, somente com autorização.",
     requirement: "conditional",
     reqs: "RIU22 · RIU23",
-    fields: [{ name: "title", label: "Título da seção", type: "text", required: true, maxLength: 80 }],
+    fields: [{ name: "title", label: "Título da seção", type: "text", required: true, maxLength: 80 }, BACKGROUND],
     items: {
       singular: "logo",
       title: "Logos",
@@ -208,6 +227,7 @@ export const SECTION_DEFS: SectionDef[] = [
       { name: "instagram", label: "Instagram", type: "text", maxLength: 40, placeholder: "@miniverso", half: true },
       { name: "successMessage", label: "Mensagem de sucesso", type: "textarea", required: true, maxLength: 160, half: true },
       { name: "errorMessage", label: "Mensagem de erro", type: "textarea", required: true, maxLength: 160, half: true },
+      BACKGROUND,
     ],
     notes: [
       "Os campos do formulário (nome, e-mail, telefone, empresa, serviço de interesse e mensagem) são definidos pelo RF06 e não mudam pelo painel.",

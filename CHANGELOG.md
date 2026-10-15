@@ -3,6 +3,26 @@
 Mudanças do painel administrativo, da mais recente para a mais antiga.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). O detalhamento de cada entrega, com capturas de tela, está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md).
 
+## [0.3.0] - 2026-10-15
+
+Revisão a partir dos comentários do João no Figma. A análise de cada comentário está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md#v030--15102026--revisão-dos-comentários-do-joão).
+
+### Adicionado
+
+- Leads de volta ao painel (RF16, RF17): lista com busca, filtro por serviço de interesse, ordenação por data e paginação; detalhe com a mensagem completa, responder por e-mail e copiar contato; exclusão com confirmação (RNF42)
+- O filtro "Serviço de interesse" usa os serviços da seção Serviços da página inicial, a mesma lista do formulário de contato
+- Campo "Imagem de fundo (opcional)" em Sobre, Serviços, Projetos, Diferenciais, Experiência interativa, Processo, Clientes e Contato (RF15). É decorativa, então não pede texto alternativo. O Hero mantém o fundo próprio e o Rodapé não tem fundo (RIU27)
+- Nota no painel de estrutura: o menu do site e os atalhos do rodapé seguem as seções visíveis, na ordem da lista
+- Mock de leads com 18 contatos fictícios (RNF18) e rotas `GET /leads`, `GET /leads/{id}` e `DELETE /leads/{id}` no formato do Laravel
+- [docs/PROPOSTAS.md](docs/PROPOSTAS.md) com as ideias fora do DRDA: recuperação de senha, gráfico de leads por período e personalização com limites
+- Testes de leads no mock, na ponte e no modo híbrido, e da imagem de fundo decorativa (63 testes)
+
+### Alterado
+
+- Menu lateral com "Página inicial" e "Leads"; sem item "Dashboard", porque no DRDA (2.2) o dashboard é o próprio painel
+- Ponte `/api/admin/*` e `MOCK_RESOURCES` passam a liberar `site-content` e `leads`
+- Contrato da API com as rotas de leads e o campo `background` das seções
+
 ## [0.2.0] - 2026-10-12
 
 ### Alterado

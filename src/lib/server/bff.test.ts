@@ -4,7 +4,7 @@
  */
 import assert from "node:assert/strict";
 import { beforeEach, describe, it } from "node:test";
-import { GET as proxyGet, PUT as proxyPut } from "@/app/api/admin/[...path]/route";
+import { DELETE as proxyDelete, GET as proxyGet, PUT as proxyPut } from "@/app/api/admin/[...path]/route";
 import { POST as login } from "@/app/api/auth/login/route";
 import { POST as logout } from "@/app/api/auth/logout/route";
 import { GET as sessionExpired } from "@/app/api/auth/session-expired/route";
@@ -106,8 +106,8 @@ describe("proxy /api/admin/*", () => {
     const cookie = await sessionCookie();
     const outside = await proxyGet(new Request(`${ORIGIN}/api/admin/users`, { headers: { cookie } }), context("users"));
     assert.equal(outside.status, 404);
-    const removed = await proxyGet(new Request(`${ORIGIN}/api/admin/leads`, { headers: { cookie } }), context("leads"));
-    assert.equal(removed.status, 404);
+    const unknown = await proxyGet(new Request(`${ORIGIN}/api/admin/projects`, { headers: { cookie } }), context("projects"));
+    assert.equal(unknown.status, 404);
     const traversal = await proxyGet(
       new Request(`${ORIGIN}/api/admin/site-content/../me`, { headers: { cookie } }),
       context("site-content", "..", "me"),
@@ -148,6 +148,24 @@ describe("proxy /api/admin/*", () => {
       context("site-content"),
     );
     assert.equal(response.status, 403);
+  });
+
+  it("lista leads com o token da sessão e repassa os filtros (RF16)", async () => {
+    const cookie = await sessionCookie();
+    const response = await proxyGet(new Request(`${ORIGIN}/api/admin/leads?per_page=5`, { headers: { cookie } }), context("leads"));
+    assert.equal(response.status, 200);
+    const body = (await response.json()) as { data: unknown[]; meta: { total: number } };
+    assert.equal(body.data.length, 5);
+    assert.equal(body.meta.total, 18);
+  });
+
+  it("exclui um lead (DELETE) e devolve 204 (RNF42 fica na tela, com confirmação)", async () => {
+    const cookie = await sessionCookie();
+    const response = await proxyDelete(
+      new Request(`${ORIGIN}/api/admin/leads/18`, { method: "DELETE", headers: { cookie, origin: ORIGIN, host: "localhost:3000" } }),
+      context("leads", "18"),
+    );
+    assert.equal(response.status, 204);
   });
 
   it("encerra a sessão local quando o token não vale mais", async () => {

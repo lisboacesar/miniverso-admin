@@ -7,6 +7,7 @@
  */
 import { validateContent } from "@/features/home-editor/rules";
 import type { SiteContent } from "@/features/home-editor/types";
+import { createSeedLeads, type MockLead } from "./leads-seed";
 import { createSeedContent } from "./site-content-seed";
 
 export type MockRequest = {
@@ -30,6 +31,7 @@ type LoginAttempts = { failures: number; lockedUntil: number };
 
 type MockStore = {
   content: SiteContent;
+  leads: MockLead[];
   attempts: Map<string, LoginAttempts>;
 };
 
@@ -49,6 +51,7 @@ const globalForMock = globalThis as typeof globalThis & { __miniversoMockStore?:
 function createStore(): MockStore {
   return {
     content: createSeedContent(),
+    leads: createSeedLeads(new Date()),
     attempts: new Map(),
   };
 }
@@ -166,6 +169,72 @@ function handleContentUpdate(request: MockRequest): MockResponse {
   return json(200, { data: store().content });
 }
 
+function normalize(value: string): string {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+/** Formato proposto para o LeadResource (docs/CONTRATO-API.md). */
+function leadResource(lead: MockLead) {
+  return {
+    id: lead.id,
+    name: lead.name,
+    email: lead.email,
+    phone: lead.phone,
+    company: lead.company,
+    service: lead.service_id ? { id: lead.service_id, title: lead.service_title } : null,
+    message: lead.message,
+    created_at: lead.created_at,
+  };
+}
+
+/** Paginação no formato do Laravel ({ data, links, meta }). */
+function paginate<T>(items: T[], params: URLSearchParams, path: string) {
+  const perPage = Math.min(Math.max(Number(params.get("per_page")) || 15, 1), 50);
+  const lastPage = Math.max(1, Math.ceil(items.length / perPage));
+  const page = Math.min(Math.max(Number(params.get("page")) || 1, 1), lastPage);
+  const start = (page - 1) * perPage;
+  const data = items.slice(start, start + perPage);
+  return {
+    data,
+    links: {
+      first: `${path}?page=1`,
+      last: `${path}?page=${lastPage}`,
+      prev: page > 1 ? `${path}?page=${page - 1}` : null,
+      next: page < lastPage ? `${path}?page=${page + 1}` : null,
+    },
+    meta: {
+      current_page: page,
+      from: data.length ? start + 1 : null,
+      last_page: lastPage,
+      path,
+      per_page: perPage,
+      to: data.length ? start + data.length : null,
+      total: items.length,
+    },
+  };
+}
+
+/** GET /leads com busca (nome, e-mail, empresa), filtro por serviço e ordenação por data (RF16). */
+function handleLeadsList(params: URLSearchParams): MockResponse {
+  const search = normalize(params.get("search") ?? "");
+  const serviceId = params.get("service_id") || null;
+  const ascending = params.get("sort") === "created_at";
+
+  const leads = store()
+    .leads.filter((lead) => {
+      if (serviceId !== null && lead.service_id !== serviceId) return false;
+      if (!search) return true;
+      return [lead.name, lead.email, lead.company ?? ""].some((field) => normalize(field).includes(search));
+    })
+    .sort((a, b) => {
+      const diff = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      return ascending ? diff : -diff;
+    })
+    .map(leadResource);
+
+  return json(200, paginate(leads, params, "/leads"));
+}
+
 function delay(): Promise<void> {
   const ms = Number(process.env.MOCK_LATENCY_MS ?? 350);
   return ms > 0 ? new Promise((resolve) => setTimeout(resolve, ms)) : Promise.resolve();
@@ -175,7 +244,8 @@ export async function mockApi(request: MockRequest): Promise<MockResponse> {
   await delay();
   const method = request.method.toUpperCase();
   const segments = request.path.split("/").filter(Boolean);
-  const [resource] = segments;
+  const params = new URLSearchParams(request.search ?? "");
+  const [resource, id] = segments;
 
   if (method === "POST" && resource === "login" && segments.length === 1) return handleLogin(request);
 
@@ -192,6 +262,20 @@ export async function mockApi(request: MockRequest): Promise<MockResponse> {
   if (resource === "logout" && method === "POST") return noContent();
   if (resource === "me" && method === "GET") return json(200, { data: userResource() });
   if (resource === "site-content" && segments.length === 1 && method === "PUT") return handleContentUpdate(request);
+
+  if (resource === "leads") {
+    if (segments.length === 1 && method === "GET") return handleLeadsList(params);
+    if (segments.length === 2) {
+      const leads = store().leads;
+      const index = leads.findIndex((lead) => String(lead.id) === id);
+      if (index === -1) return notFound();
+      if (method === "GET") return json(200, { data: leadResource(leads[index]) });
+      if (method === "DELETE") {
+        leads.splice(index, 1);
+        return noContent();
+      }
+    }
+  }
 
   return notFound();
 }

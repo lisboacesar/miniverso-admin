@@ -1,10 +1,10 @@
 # Painel administrativo Miniverso
 
 Front-end do painel administrativo do portfólio institucional da Miniverso, em **Next.js 16** e **React 19**.
-Esta parte do projeto é o **editor da página inicial** (frame "Painel · Editor da página inicial" no Figma): a página onde o administrador muda a estrutura e o conteúdo da home do site.
+Esta parte do projeto é o **editor da página inicial** (frame "Painel · Editor da página inicial" no Figma), onde o administrador muda a estrutura e o conteúdo da home do site, e a consulta de **leads** recebidos pelo formulário de contato (seção "Painel · Leads" no Figma).
 Projeto da disciplina Programação Avançada para Web (UNDB, Prof. Me. Kleydson Beckman).
 
-Versão atual: **0.2.0**. O histórico de entregas está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md).
+Versão atual: **0.3.0**. O histórico de entregas está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md) e as ideias fora do DRDA, em [docs/PROPOSTAS.md](docs/PROPOSTAS.md).
 
 ## O que já funciona
 
@@ -15,7 +15,12 @@ Versão atual: **0.2.0**. O histórico de entregas está em [docs/EVOLUCAO.md](d
   - exibir ou ocultar as seções opcionais, com as regras do DRDA (Experiência interativa bloqueada, Clientes só com logo autorizado)
   - textos, imagens e opções de cada seção, com limites e campos obrigatórios marcados
   - itens de cada seção (serviços, projetos, etapas, logos, redes) com adicionar, editar, reordenar, ocultar e remover
+  - imagem de fundo opcional nas seções do meio, decorativa e sem texto alternativo
   - rascunho com aviso de alterações, "Descartar" e "Salvar e publicar"
+- Leads (`/admin/leads`):
+  - lista com busca por nome, e-mail ou empresa, filtro por serviço de interesse, ordenação por data e paginação
+  - detalhe com a mensagem completa, responder por e-mail e copiar o contato
+  - exclusão com confirmação que nomeia o lead
 
 ## Como rodar
 
@@ -47,7 +52,7 @@ API_URL=http://localhost:8000
 API_MODE=live
 ```
 
-O login, a sessão e a saída passam a usar a API real. O conteúdo da página inicial (`site-content`) ainda não existe no back-end, então continua vindo do mock (variável `MOCK_RESOURCES`). Quando a rota for criada lá, tire o nome dela dessa lista. O contrato está em [docs/CONTRATO-API.md](docs/CONTRATO-API.md).
+O login, a sessão e a saída passam a usar a API real. O conteúdo da página inicial (`site-content`) e os leads (`leads`) ainda não existem no back-end, então continuam vindo do mock (`MOCK_RESOURCES=site-content,leads`). Quando uma rota for criada lá, tire o nome dela dessa lista. O contrato está em [docs/CONTRATO-API.md](docs/CONTRATO-API.md).
 
 ## Scripts
 
@@ -84,16 +89,18 @@ Com `API_MODE=mock`, a mesma ponte responde com os dados de `src/mock`, então d
 src/
 ├─ app/                  rotas do Next.js (App Router)
 │  ├─ admin/login/       tela de login
-│  ├─ admin/(painel)/    telas protegidas (pagina-inicial)
+│  ├─ admin/(painel)/    telas protegidas (pagina-inicial e leads)
 │  └─ api/               rotas do BFF (auth e ponte para a API)
 ├─ components/
 │  ├─ layout/            menu lateral, cabeçalho e menu da conta
 │  └─ ui/                botão, campos, switch, modais, toasts, estados vazios e de erro
 ├─ features/
 │  ├─ auth/              login e saída por inatividade
-│  └─ home-editor/       editor: schema das seções, regras, API e componentes
+│  ├─ home-editor/       editor: schema das seções, regras, API e componentes
+│  └─ leads/             lista, detalhe e exclusão de leads
 ├─ lib/
 │  ├─ api/               cliente HTTP, mensagens de erro e conversão dos dados da API
+│  ├─ hooks/             carregamento de dados e busca com atraso
 │  └─ server/            regras do BFF: sessão, chamada à API, autenticação
 ├─ mock/                 API de exemplo no formato do Laravel
 ├─ types/                modelos usados no front
@@ -113,6 +120,8 @@ src/
 | Rascunho local e publicação única | o site nunca mostra meia alteração; falha não apaga o que foi feito | RF18, RNF31, RNF44 |
 | Setas para reordenar | funciona no teclado e no toque, ao contrário de arrastar | RNF35, RNF40 |
 | Remoção sempre com modal que nomeia o item | evita apagar algo por engano | RNF42 |
+| Serviço de interesse ligado à seção Serviços | o filtro de leads e o formulário do site usam a mesma lista | RF06, RF16, RNF28 |
+| Imagem de fundo decorativa, sem texto alternativo | o RNF34 vale para imagens relevantes; a página pública aplica uma camada para o texto manter o contraste | RF15, RNF33, RNF34 |
 | `<dialog>` nativo, rótulos visíveis e foco visível | acessibilidade sem biblioteca extra | RNF35, RNF36 |
 | Mock no formato do Laravel | o painel evolui em paralelo com o back-end | 2.5 (desenvolvimento incremental) |
 
@@ -127,4 +136,4 @@ src/
 npm test
 ```
 
-Cobrem as regras do editor (obrigatórios, limites, ordem das seções, Clientes, Experiência, projeto em destaque, arquivos), o mock da API, os redirecionamentos seguros e as rotas do BFF: cookie httpOnly, mensagem genérica de login, bloqueio por tentativas, recusa de chamadas de outros sites e de caminhos fora da lista permitida.
+Cobrem as regras do editor (obrigatórios, limites, ordem das seções, Clientes, Experiência, projeto em destaque, arquivos, imagem de fundo), os leads (busca, filtro, ordem, exclusão, acesso sem token), o mock da API, os redirecionamentos seguros e as rotas do BFF: cookie httpOnly, mensagem genérica de login, bloqueio por tentativas, recusa de chamadas de outros sites e de caminhos fora da lista permitida.

@@ -109,4 +109,15 @@ describe("regras do editor da página inicial", () => {
     const model = SECTION_BY_KEY.hero.fields.find((field) => field.name === "model3d")!;
     assert.equal(validateFile({ name: "oculos.glb", type: "", size: 5 * 1024 * 1024 }, model), null);
   });
+
+  it("imagem de fundo é opcional e decorativa: não pede texto alternativo (RF15, RNF34)", () => {
+    const sobre = SECTION_BY_KEY.sobre.fields;
+    const background = sobre.find((field) => field.name === "background");
+    assert.ok(background?.decorative);
+    assert.equal(background?.required, undefined);
+    const errors = validateFields(sobre, { title: "Quem somos", text: "Texto", background: "data:image/png;base64,AAA" });
+    assert.deepEqual(errors, {});
+    // O Rodapé não tem fundo próprio: mantém a identidade do site (RIU27).
+    assert.ok(!SECTION_BY_KEY.rodape.fields.some((field) => field.name === "background"));
+  });
 });

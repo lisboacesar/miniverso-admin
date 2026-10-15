@@ -18,6 +18,11 @@ async function getContent(): Promise<Content> {
   return ((await mockApi({ method: "GET", path: "/site-content" })).data as { data: Content }).data;
 }
 
+type LeadPage = {
+  data: Array<{ id: number; name: string; created_at: string; service: { id: string; title: string } | null }>;
+  meta: { total: number; last_page: number };
+};
+
 const put = async (sections: Content["sections"], auth: string | null) =>
   mockApi({ method: "PUT", path: "/site-content", body: JSON.stringify({ sections }), contentType: "application/json", token: auth });
 
@@ -88,5 +93,45 @@ describe("mock da API", () => {
   it("recusa a lista de seções incompleta", async () => {
     const { sections } = await getContent();
     assert.equal((await put(sections.slice(1), await token())).status, 422);
+  });
+
+  it("lista leads paginados, do mais recente ao mais antigo (RF16)", async () => {
+    const response = await mockApi({ method: "GET", path: "/leads", search: "?per_page=10", token: await token() });
+    const page = response.data as LeadPage;
+    assert.equal(response.status, 200);
+    assert.equal(page.data.length, 10);
+    assert.equal(page.meta.total, 18);
+    assert.equal(page.meta.last_page, 2);
+    const dates = page.data.map((lead) => new Date(lead.created_at).getTime());
+    assert.deepEqual(dates, [...dates].sort((a, b) => b - a));
+  });
+
+  it("busca leads sem diferenciar acentos e maiúsculas", async () => {
+    const response = await mockApi({ method: "GET", path: "/leads", search: "?search=CLINICA", token: await token() });
+    const page = response.data as LeadPage;
+    assert.equal(page.meta.total, 1);
+    assert.equal(page.data[0].name, "Carla Mendes");
+  });
+
+  it("filtra leads pelo serviço da seção Serviços", async () => {
+    const content = await getContent();
+    const firstService = content.sections.find((section) => section.key === "servicos")?.items[0];
+    assert.ok(firstService);
+    const response = await mockApi({ method: "GET", path: "/leads", search: `?service_id=${String(firstService.id)}&per_page=50`, token: await token() });
+    const page = response.data as LeadPage;
+    assert.ok(page.meta.total > 0);
+    assert.ok(page.data.every((lead) => lead.service?.id === firstService.id && lead.service?.title === firstService.title));
+  });
+
+  it("exige login para ver leads (RNF19)", async () => {
+    assert.equal((await mockApi({ method: "GET", path: "/leads" })).status, 401);
+  });
+
+  it("exclui um lead e depois responde 404", async () => {
+    const auth = await token();
+    assert.equal((await mockApi({ method: "DELETE", path: "/leads/18", token: auth })).status, 204);
+    assert.equal((await mockApi({ method: "GET", path: "/leads/18", token: auth })).status, 404);
+    const page = (await mockApi({ method: "GET", path: "/leads", token: auth })).data as LeadPage;
+    assert.equal(page.meta.total, 17);
   });
 });

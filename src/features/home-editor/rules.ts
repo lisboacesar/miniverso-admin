@@ -46,7 +46,7 @@ export function validateFields(defs: FieldDef[], values: Record<string, FieldVal
     }
   }
   // Imagem enviada pede texto alternativo (RNF34).
-  const imageFields = defs.filter((def) => def.type === "image").map((def) => def.name);
+  const imageFields = defs.filter((def) => def.type === "image" && !def.decorative).map((def) => def.name);
   const altField = defs.find((def) => /alt$/i.test(def.name));
   if (altField && imageFields.some((name) => !isBlank(values[name])) && isBlank(values[altField.name])) {
     errors[altField.name] = "Descreva a imagem para quem usa leitor de tela.";

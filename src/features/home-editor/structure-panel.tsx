@@ -113,6 +113,9 @@ export function StructurePanel({ content, selected, changed, invalid, onSelect, 
       <p className={styles.note}>
         <strong>Nota:</strong> seções novas exigem desenvolvimento (3.1.1). O painel exibe, oculta, reordena e edita as seções existentes.
       </p>
+      <p className={styles.note}>
+        <strong>Cabeçalho:</strong> o menu do site e os atalhos do rodapé seguem as seções visíveis, na ordem desta lista.
+      </p>
     </section>
   );
 }

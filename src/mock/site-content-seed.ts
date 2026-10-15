@@ -33,6 +33,7 @@ export function createSeedContent(): SiteContent {
         fields: {
           title: "Um universo de possibilidades em escala humana.",
           text: "A Miniverso nasceu na educação e hoje cria experiências em realidade virtual, aumentada e mista, além de vídeos em 360 graus e software sob medida.",
+          background: "",
         },
         items: [
           { id: "sobre-1", title: "Sob medida", description: "Cada experiência parte da necessidade do cliente." },
@@ -44,7 +45,7 @@ export function createSeedContent(): SiteContent {
       {
         key: "servicos",
         visible: true,
-        fields: { title: "Novas formas de experimentar.", subtitle: "Do conceito à entrega, com tecnologia imersiva." },
+        fields: { title: "Novas formas de experimentar.", subtitle: "Do conceito à entrega, com tecnologia imersiva.", background: "" },
         items: [
           { id: "serv-1", visible: true, title: "Realidade virtual", description: "Simulações e treinamentos imersivos com óculos de RV.", image: "", imageAlt: "" },
           { id: "serv-2", visible: true, title: "Realidade aumentada", description: "Conteúdo digital sobre o mundo real, direto no celular.", image: "", imageAlt: "" },
@@ -56,7 +57,7 @@ export function createSeedContent(): SiteContent {
       {
         key: "projetos",
         visible: true,
-        fields: { title: "Projetos que viraram experiência.", subtitle: "Alguns trabalhos recentes da Miniverso.", featured: "proj-1" },
+        fields: { title: "Projetos que viraram experiência.", subtitle: "Alguns trabalhos recentes da Miniverso.", featured: "proj-1", background: "" },
         items: [
           {
             id: "proj-1",
@@ -102,7 +103,7 @@ export function createSeedContent(): SiteContent {
       {
         key: "diferenciais",
         visible: true,
-        fields: { title: "Por que a Miniverso" },
+        fields: { title: "Por que a Miniverso", background: "" },
         items: [
           { id: "dif-1", title: "Inovação" },
           { id: "dif-2", title: "Personalização" },
@@ -115,13 +116,13 @@ export function createSeedContent(): SiteContent {
       {
         key: "experiencia",
         visible: false,
-        fields: { title: "Transforme atenção em conexão real.", text: "" },
+        fields: { title: "Transforme atenção em conexão real.", text: "", background: "" },
         items: [],
       },
       {
         key: "processo",
         visible: true,
-        fields: { title: "Da conversa à experiência.", subtitle: "Como uma ideia vira projeto." },
+        fields: { title: "Da conversa à experiência.", subtitle: "Como uma ideia vira projeto.", background: "" },
         items: [
           { id: "proc-1", title: "Descobrir", description: "Entendemos a necessidade e o público do projeto." },
           { id: "proc-2", title: "Planejar", description: "Definimos a solução e a experiência pretendida." },
@@ -132,7 +133,7 @@ export function createSeedContent(): SiteContent {
       {
         key: "clientes",
         visible: false,
-        fields: { title: "Quem já viveu outras realidades com a gente" },
+        fields: { title: "Quem já viveu outras realidades com a gente", background: "" },
         items: [],
       },
       {
@@ -146,6 +147,7 @@ export function createSeedContent(): SiteContent {
           instagram: "@miniverso",
           successMessage: "Mensagem enviada! Em breve a equipe da Miniverso entra em contato.",
           errorMessage: "Não foi possível enviar agora. Seus dados foram mantidos, tente de novo.",
+          background: "",
         },
         items: [],
       },

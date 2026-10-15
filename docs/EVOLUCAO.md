@@ -13,16 +13,93 @@ Cada entrega ganha uma entrada neste arquivo, com o que mudou, os requisitos do 
 | 0.1.0 | 11/10/2026 | Base do painel, login, sessão, visão geral e leads | entregue |
 | 0.1.1 | 11/10/2026 | Login e sessão integrados ao back-end real | entregue |
 | 0.2.0 | 12/10/2026 | Editor da página inicial (escopo corrigido) | entregue com mock |
-| 0.3.0 | a definir | Editor ligado às rotas reais de conteúdo e envio de imagens | depende do back-end |
-| 0.4.0 | a definir | Ajustes finais, testes com pessoas de fora da equipe e publicação | planejada |
-
---- | --- | --- | --- |
-| 0.1.0 | 11/10/2026 | Base do painel, login, sessão, visão geral e leads | entregue |
-| 0.1.1 | 11/10/2026 | Login e sessão integrados ao back-end real | entregue |
-| 0.2.0 | a definir | Serviços: cadastrar, editar e remover | planejada |
-| 0.3.0 | a definir | Projetos: cadastrar, editar, remover e enviar imagens | planejada |
-| 0.4.0 | a definir | Conteúdo do site: textos e imagens da página inicial | planejada |
+| 0.3.0 | 15/10/2026 | Revisão dos comentários do João: leads, imagem de fundo e propostas | entregue com mock |
+| 0.4.0 | a definir | Editor e leads ligados às rotas reais e envio de imagens | depende do back-end |
 | 0.5.0 | a definir | Ajustes finais, testes com pessoas de fora da equipe e publicação | planejada |
+
+---
+
+## v0.3.0 · 15/10/2026 · Revisão dos comentários do João
+
+### Contexto
+
+O João deixou 4 comentários no frame "Painel · Editor da página inicial" do Figma. Cada comentário foi conferido com o DRDA antes de virar mudança. O que o DRDA prevê entrou no painel e no Figma. O que não prevê foi para a página **99 · Propostas** do Figma e para [PROPOSTAS.md](PROPOSTAS.md), para o cliente decidir.
+
+### Análise dos comentários
+
+| # | Comentário (resumo) | Decisão | Base no DRDA |
+| --- | --- | --- | --- |
+| 1 | Não haverá dashboards; o dashboard deve ser um gráfico da interação de leads | Item "Dashboard" saiu do menu. O gráfico virou proposta | Em 2.2, "dashboard" é o próprio painel administrativo. Nenhum RF pede gráficos |
+| 2 | O layout precisa de mais detalhe e de um menu para alterar toda a estrutura | O painel "Estrutura da página" já faz isso: ordem, visibilidade e edição de cada seção. O Figma ganhou as telas de Leads, os estados e a nota do cabeçalho | RF15, RF18, RNF41 |
+| 3 | Alterar cores, planos de fundo, fontes, textos e disposição de qualquer elemento | Entrou a imagem de fundo por seção. Cor, fonte e disposição livres viraram proposta de personalização com limites | Identidade própria (3.1.1), RN06, RNF28, RNF33, RNF41 |
+| 4 | Login, recuperação de senha, imagem de fundo, tela de leads e gráfico | Login já existia. Leads voltou e a imagem de fundo entrou. Recuperação de senha e gráfico viraram propostas | RF11, RF15, RF16, RF17. Recuperação de senha não está no DRDA nem no back-end |
+
+### O que mudou no painel
+
+- **Leads** (`/admin/leads`): tabela com nome e empresa, contato, serviço de interesse e data de envio. Busca por nome, e-mail ou empresa (sem diferenciar acentos), filtro por serviço, ordenação por data e paginação de 10 em 10. No celular, a tabela vira cartões.
+- **Detalhe do lead** (`/admin/leads/{id}`): mensagem completa, e-mail e telefone com botão de copiar, "Responder por e-mail" (abre o e-mail com destinatário e assunto preenchidos), "Copiar contato" e "Excluir lead". Um aviso lembra que os dados só servem para responder ao contato (LGPD).
+- **Exclusão** com modal que nomeia o lead e avisa que a ação é permanente. O botão mostra "Excluindo..." e não aceita um segundo clique.
+- **Serviço de interesse** usa os serviços da seção Serviços da página inicial, a mesma lista que o formulário de contato do site oferece. O lead guarda também o nome do serviço no momento do envio, para continuar legível se o serviço mudar de nome.
+- **Imagem de fundo (opcional)** em Sobre, Serviços, Projetos, Diferenciais, Experiência interativa, Processo, Clientes e Contato. É decorativa, então não pede texto alternativo. O Hero continua com o fundo próprio, que pede texto alternativo, e o Rodapé não tem fundo (RIU27).
+- **Nota do cabeçalho** no painel de estrutura: o menu do site e os atalhos do rodapé seguem as seções visíveis, na ordem da lista.
+- **Menu lateral** com "Página inicial" e "Leads".
+
+### O que mudou no Figma
+
+- Editor: campo "Imagem de fundo (opcional)" nas 8 seções, com a explicação ao lado; item "Dashboard" removido dos 10 menus; nota do cabeçalho nos 10 painéis de estrutura; linhas de frames reespaçadas para nada se sobrepor.
+- Nova seção **Painel · Leads**: legenda, lista, detalhe, confirmação de exclusão e estados (carregando, lista vazia, busca sem resultado, erro, excluindo, excluído, lead não encontrado e copiar).
+- Nova página **99 · Propostas**: recuperação de senha, gráfico de leads por período e personalização com limites, cada uma com origem, motivo de estar fora do DRDA, o que exigiria e um esboço.
+- Contraste conferido em todos os pares novos: texto secundário `#666e7d` sobre `#f6f8fb` (4,8:1) e sobre branco (5,1:1), serviço `#2450e6` sobre `#e5f0ff` (5,4:1), sucesso `#0e6b3c` sobre `#e0f7e8` (5,9:1), erro `#b42323` sobre `#fce8e8` (5,6:1), links `#1a66ed` sobre branco (5,0:1) e exclusão `#cc2e2e` sobre branco (5,3:1).
+
+### Requisitos atendidos
+
+| Requisito | Como foi atendido |
+| --- | --- |
+| RF16, RNF19, RN05 | Lista de leads guardados, visível só com sessão |
+| RF17 | Detalhe com todos os dados e a mensagem completa |
+| RF15 | Imagem de fundo como imagem institucional de cada seção |
+| RNF08, RNF29 | Carregando, vazio, erro, "Excluindo..." e aviso de sucesso |
+| RNF18 | Dados fictícios e aviso de uso dos dados no detalhe |
+| RNF22 | Mensagem do visitante exibida como texto, nunca como HTML |
+| RNF33 | Na página pública, o fundo recebe uma camada para manter o contraste do texto (no contrato) |
+| RNF34 | Imagem decorativa sem texto alternativo; imagens com conteúdo continuam pedindo |
+| RNF39 | Serviço, estados e avisos com texto e ícone, não só cor |
+| RNF42 | Exclusão só depois de confirmar num modal que nomeia o lead |
+| RNF43 | "Não foi possível conectar. Verifique sua internet e tente de novo." |
+
+### Capturas de tela
+
+Capturas da v0.3.0 em modo mock, com dados fictícios. No ambiente de captura as fontes do Google não carregam, então aparecem as fontes de reserva.
+
+| | |
+| --- | --- |
+| ![Campo de fundo](prints/v0.3.0/01-sobre-campo-fundo.png) Campo de imagem de fundo | ![Fundo enviado](prints/v0.3.0/02-sobre-fundo-enviado.png) Fundo enviado, sem texto alternativo |
+| ![Publicado com fundo](prints/v0.3.0/03-publicado-com-fundo.png) Publicado com fundo | ![Leads](prints/v0.3.0/04-leads-lista.png) Lista de leads |
+| ![Busca](prints/v0.3.0/05-leads-busca.png) Busca | ![Filtro](prints/v0.3.0/06-leads-filtro-servico.png) Filtro por serviço |
+| ![Sem resultado](prints/v0.3.0/07-leads-sem-resultado.png) Busca sem resultado | ![Detalhe](prints/v0.3.0/08-lead-detalhe.png) Detalhe do lead |
+| ![Confirmação](prints/v0.3.0/09-lead-excluir-confirmacao.png) Confirmação (RNF42) | ![Excluído](prints/v0.3.0/10-lead-excluido-toast.png) Lead excluído |
+| ![Erro](prints/v0.3.0/11-leads-erro.png) Falha ao carregar | ![Tablet](prints/v0.3.0/12-tablet-leads.png) Tablet |
+| ![Celular, leads](prints/v0.3.0/13-mobile-leads.png) Celular: leads | ![Celular, detalhe](prints/v0.3.0/14-mobile-lead-detalhe.png) Celular: detalhe |
+| ![Celular, menu](prints/v0.3.0/15-mobile-menu.png) Celular: menu | |
+
+### Testes
+
+- `npm test`: 63 testes passando. Novos: lista de leads no mock (ordem, busca sem acento, filtro por serviço, 401 sem token, exclusão), leads pela ponte e no modo híbrido, conversão de lead e da paginação do Laravel, imagem de fundo opcional e decorativa.
+- Fluxos conferidos no navegador em 1440, 1024 e 390 px: enviar fundo e publicar sem texto alternativo, buscar, filtrar, abrir o detalhe, copiar, excluir e falha ao carregar. Nenhum alvo de toque abaixo de 44 px no celular.
+
+### Pontos de atenção
+
+- **Leads voltou ao painel.** Na v0.2.0 o módulo tinha saído porque a divisão da equipe deixou para esta parte só o editor. O comentário #4 pede a tela e o DRDA prevê (RF16, RF17). Se outra pessoa da equipe já estiver com leads, o módulo sai sem afetar o editor: pasta `src/features/leads`, as duas rotas e o item do menu.
+- **Contraste de pares antigos do Figma** abaixo de 4,5:1 (RNF33): dica dos campos de envio `#99a1ad` sobre `#eceff3` (2,3:1), aviso de sucesso `#148c52` sobre `#e0f7e8` (3,8:1), etiquetas de requisito `#1a66ed` sobre `#e5f0ff` (4,4:1) e aviso de erro `#cc2e2e` sobre `#fce8e8` (4,46:1). No código esses pares já usam as cores do `globals.css`, que passam.
+
+### Limitações conhecidas
+
+- O back-end ainda não tem `/leads` nem `/site-content`; as duas partes rodam com o mock (contrato em [CONTRATO-API.md](CONTRATO-API.md)).
+- O envio de imagens, incluindo o fundo, guarda a prévia no próprio conteúdo até existir a rota de upload.
+
+### Próximo passo
+
+Quando o back-end criar `/leads`, `/site-content` e o envio de imagens, tirar os nomes de `MOCK_RESOURCES` e conferir o painel com a API real (v0.4.0).
 
 ---
 

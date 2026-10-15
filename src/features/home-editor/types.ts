@@ -30,6 +30,8 @@ export type FieldDef = {
   options?: OptionSource;
   /** Ocupa meia largura no desktop. */
   half?: boolean;
+  /** Imagem só de enfeite (ex.: fundo): não exige texto alternativo (RNF34 vale para imagens com conteúdo). */
+  decorative?: boolean;
   /** Para arquivos: tipos aceitos e tamanho máximo (RNF24). */
   accept?: string[];
   maxSizeMb?: number;

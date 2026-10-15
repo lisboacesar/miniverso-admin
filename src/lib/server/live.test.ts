@@ -83,4 +83,15 @@ describe("modo live com o contrato do metaverso-back", () => {
     assert.equal(response.status, 200);
     assert.equal(((await response.json()) as { data: { sections: unknown[] } }).data.sections.length, 10);
   });
+
+  it("serve leads pelo mock enquanto o back-end não tem a rota", async () => {
+    const response = await proxyGet(
+      new Request("http://localhost:3000/api/admin/leads?per_page=3", {
+        headers: { cookie: `miniverso_admin_session=${encodeURIComponent(VALID_TOKEN)}` },
+      }),
+      { params: Promise.resolve({ path: ["leads"] }) },
+    );
+    assert.equal(response.status, 200);
+    assert.equal(((await response.json()) as { data: unknown[] }).data.length, 3);
+  });
 });
