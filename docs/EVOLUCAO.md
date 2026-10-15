@@ -14,8 +14,88 @@ Cada entrega ganha uma entrada neste arquivo, com o que mudou, os requisitos do 
 | 0.1.1 | 11/10/2026 | Login e sessão integrados ao back-end real | entregue |
 | 0.2.0 | 12/10/2026 | Editor da página inicial (escopo corrigido) | entregue com mock |
 | 0.3.0 | 15/10/2026 | Revisão dos comentários do João: leads, imagem de fundo e propostas | entregue com mock |
-| 0.4.0 | a definir | Editor e leads ligados às rotas reais e envio de imagens | depende do back-end |
-| 0.5.0 | a definir | Ajustes finais, testes com pessoas de fora da equipe e publicação | planejada |
+| 0.4.0 | 15/10/2026 | Modo escuro no painel e no Figma | entregue com mock |
+| 0.5.0 | a definir | Editor e leads ligados às rotas reais e envio de imagens | depende do back-end |
+| 0.6.0 | a definir | Ajustes finais, testes com pessoas de fora da equipe e publicação | planejada |
+
+---
+
+## v0.4.0 · 15/10/2026 · Modo escuro
+
+### O que mudou no painel
+
+- **Botão de tema no cabeçalho**, ao lado de "Ver site": "Modo escuro" com a lua no tema claro e "Modo claro" com o sol no tema escuro. Abaixo de 1024 px aparece só o ícone, com área de toque de 44 px e dica ao passar o mouse; o leitor de tela continua lendo o nome do botão. No celular, o espaço entre os botões do cabeçalho diminuiu para o título da página caber inteiro.
+- **Primeira visita segue o sistema**: sem escolha salva, o painel usa o tema do aparelho. Depois do clique, a escolha fica num cookie por um ano e vale em todas as telas, inclusive no login.
+- **Sem piscar o tema errado**: o servidor lê o cookie e já entrega a página com o tema certo (`data-theme` no `<html>`, em `app/layout.tsx`). Sem cookie, o CSS segue `prefers-color-scheme`. Nenhum script roda antes da página carregar.
+- **Cores por papel**: os componentes deixaram as cores fixas e passaram a usar papéis como `--color-surface`, `--color-text` e `--color-accent`. O modo escuro troca só os papéis. Menu lateral, lateral do login e aviso flutuante já eram escuros e continuam iguais.
+- **Contornos no modo escuro**: modais, avisos, menu lateral e lateral do login ganham uma linha clara sutil para não se misturarem com o fundo.
+- **Página não encontrada**: o botão agora diz "Ir para o painel", porque a visão geral não existe mais.
+
+### O que mudou no Figma
+
+- Nova coleção de variáveis **Painel · Cores**, com os modos **Claro** e **Escuro** (28 cores). Todas as cores das telas do painel foram ligadas a ela, 2.350 preenchimentos e contornos, sem mudar o tema claro.
+- Componente **Botão / Tema**, com os estados "Modo escuro" e "Modo claro", no fim da barra superior das 12 telas.
+- Nova seção **Painel · Modo escuro**: legenda, tabela das variáveis com as amostras dos dois modos e cópias de 8 telas com o modo Escuro aplicado (editor, painel lateral de projeto, confirmação de remoção, estados do editor e lista, detalhe, exclusão e estados de leads).
+- Na página 99 · Propostas, a personalização com limites passou a dizer que o modo escuro já existe e não depende dela.
+
+### Requisitos atendidos
+
+| Requisito | Como foi atendido |
+| --- | --- |
+| RNF33 | Contraste conferido por teste nos dois temas. No escuro, sobre a superfície: texto principal 14,4:1, secundário 7,7:1, azul 7,4:1 e erro 7,9:1; avisos de sucesso 9,1:1 e de atenção 9,4:1 sobre o próprio fundo |
+| RNF35 | Foco visível nos dois temas; no escuro o contorno é azul claro (`#8AA6FF`, 7,4:1) |
+| RNF39 | O botão troca de ícone (lua ou sol) e de texto; o estado não depende só da cor |
+| RNF40 | Botão de 44 × 44 px no tablet e no celular |
+| RNF28 | Mesmo desenho do link "Ver site"; todos os componentes usam os mesmos papéis de cor |
+| RNF41 | Um clique, sem configuração; a escolha fica salva |
+| 3.1.1 | Identidade mantida: botões no azul `#2450E6`, texto claro sobre azul-marinho |
+
+### Capturas de tela
+
+Capturas da v0.4.0 em modo mock, com dados fictícios. No ambiente de captura as fontes do Google não carregam, então aparecem as fontes de reserva.
+
+| | |
+| --- | --- |
+| ![Login](prints/v0.4.0/01-login-escuro.png) Login no modo escuro | ![Botão no tema claro](prints/v0.4.0/02-editor-claro-botao-modo-escuro.png) Botão "Modo escuro" no tema claro |
+| ![Editor](prints/v0.4.0/03-editor-escuro.png) Editor: Hero | ![Sobre](prints/v0.4.0/04-editor-sobre-escuro.png) Editor: Sobre a Miniverso |
+| ![Erros no modal](prints/v0.4.0/05-modal-erros-escuro.png) Campos obrigatórios | ![Remover](prints/v0.4.0/06-confirmar-remocao-escuro.png) Confirmação (RNF42) |
+| ![Projeto](prints/v0.4.0/07-painel-lateral-escuro.png) Projeto em painel lateral | ![Alteração pendente](prints/v0.4.0/08-alteracao-pendente-escuro.png) Alteração pendente |
+| ![Menu da conta](prints/v0.4.0/09-menu-conta-escuro.png) Menu da conta | ![Leads](prints/v0.4.0/10-leads-escuro.png) Lista de leads |
+| ![Detalhe](prints/v0.4.0/11-lead-detalhe-escuro.png) Detalhe do lead | ![Aviso](prints/v0.4.0/12-aviso-escuro.png) Aviso de contato copiado |
+| ![Excluir](prints/v0.4.0/13-excluir-lead-escuro.png) Excluir lead (RNF42) | ![Erro](prints/v0.4.0/14-erro-escuro.png) Falha ao carregar (RNF43) |
+| ![Carregando](prints/v0.4.0/15-carregando-escuro.png) Carregando | ![Foco](prints/v0.4.0/16-foco-teclado-escuro.png) Foco pelo teclado (RNF35) |
+| ![Tablet](prints/v0.4.0/17-tablet-escuro.png) Tablet | ![Celular, editor](prints/v0.4.0/18-celular-editor-escuro.png) Celular: editor |
+| ![Celular, menu](prints/v0.4.0/19-celular-menu-escuro.png) Celular: menu | ![Celular, leads](prints/v0.4.0/20-celular-leads-escuro.png) Celular: leads |
+
+### Testes
+
+- `npm test`: 73 testes passando. Novos: `theme.test.ts` (valor do cookie, sistema e escolha salva, alternância e formato do cookie) e `theme-tokens.test.ts` (blocos do modo escuro iguais, todo papel com valor no escuro, contraste mínimo nos dois temas e componentes sem cores fixas).
+- Tema claro conferido elemento por elemento: estilo calculado de todos os elementos em 29 estados, antes e depois da troca para papéis. Só mudou a cor do título dos formulários em modal, como descrito acima.
+- Modo escuro conferido pelos dois caminhos: as 29 capturas pelo cookie e pelo tema do sistema ficam idênticas, e "claro" salvo com o sistema escuro fica idêntico ao tema claro padrão.
+- Botão testado no navegador: clique, recarregar, outra página, tela de login, cookie com valor inválido, teclado (Tab e Enter) e celular.
+- Cabeçalho conferido em 360, 390, 600, 767, 768, 800, 900, 1024 e 1280 px: nenhum título cortado e nenhuma rolagem lateral.
+
+### Decisões
+
+- **Botão no cabeçalho, não no menu da conta**: fica à vista em todas as telas, também no celular, e resolve com um clique (RNF41).
+- **Cookie em vez de localStorage**: com o cookie, o servidor desenha a página já no tema escolhido, sem mostrar o claro por um instante antes do escuro. Ele guarda só `light` ou `dark`, sem dado pessoal.
+- **Seguir o sistema na primeira visita**: quem já usa o aparelho no escuro não precisa fazer nada.
+- **Cookie lido no layout raiz**: isso deixa todas as rotas com renderização dinâmica. No painel não muda nada na prática, porque as telas protegidas já eram dinâmicas por causa da sessão.
+- **Cores de ação iguais nos dois temas**: o azul dos botões e o vermelho de exclusão não mudam, com texto branco acima de 6:1.
+
+### Pontos de atenção
+
+- **Fora do DRDA**: o DRDA não cita modo escuro. Foi incluído a pedido da equipe, sem mudar a identidade (3.1.1). Vale registrar no DRDA ou no relatório.
+
+### Limitações conhecidas
+
+- A escolha vale por navegador: em outro computador, o painel começa de novo pelo tema do sistema.
+- Depois de escolher, não há botão para voltar a seguir o sistema; para isso é preciso apagar o cookie. Se fizer falta, dá para incluir a opção "Automático".
+- A ligação com as rotas reais de conteúdo, leads e envio de imagens continua com o mock e passou para a v0.5.0.
+
+### Próximo passo
+
+Ligar o editor e os leads às rotas reais quando o back-end criar `/site-content`, `/leads` e o envio de imagens (v0.5.0).
 
 ---
 

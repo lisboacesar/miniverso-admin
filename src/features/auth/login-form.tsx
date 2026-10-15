@@ -71,7 +71,7 @@ export function LoginForm({ reason, redirectTo }: LoginFormProps) {
     const result = await requestLogin(login.trim(), password);
 
     if (result.ok) {
-      // O botão continua em "Entrando..." até a visão geral abrir.
+      // O botão continua em "Entrando..." até o painel abrir.
       router.replace(redirectTo);
       return;
     }

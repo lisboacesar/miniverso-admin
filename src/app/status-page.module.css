@@ -24,8 +24,8 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--mv-blue-50);
-  color: var(--color-primary);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
 }
 
 .icon svg {
@@ -34,14 +34,14 @@
 }
 
 .danger .icon {
-  background: var(--danger-50);
-  color: var(--danger-700);
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
 }
 
 .title {
   font-family: var(--font-display);
   font-size: var(--text-xl);
-  color: var(--mv-indigo-900);
+  color: var(--color-heading);
 }
 
 .text {

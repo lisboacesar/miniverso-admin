@@ -13,6 +13,8 @@
   gap: var(--space-8);
   padding: var(--space-12);
   background: var(--mv-indigo-900);
+  /* No modo escuro, uma linha separa esta lateral do formulário, que também fica escuro */
+  box-shadow: inset -1px 0 0 var(--color-sidebar-edge);
   color: #fff;
   overflow: hidden;
 }
@@ -100,7 +102,7 @@
   font-family: var(--font-display);
   font-size: var(--text-2xl);
   font-weight: 700;
-  color: var(--mv-indigo-900);
+  color: var(--color-heading);
 }
 
 .subtitle {
@@ -143,7 +145,7 @@
     font-family: var(--font-display);
     font-size: var(--text-xl);
     font-weight: 700;
-    color: var(--mv-indigo-900);
+    color: var(--color-heading);
   }
 
   .mobileBrandSub {

@@ -10,6 +10,7 @@ import { publicConfig } from "@/lib/public-config";
 import { loginRedirectFor } from "@/lib/routes";
 import type { User } from "@/types/models";
 import { NAV_ITEMS, isNavItemActive, pageTitleFor } from "./nav";
+import { ThemeToggle } from "./theme-toggle";
 import { UserMenu } from "./user-menu";
 import styles from "./admin-shell.module.css";
 
@@ -21,7 +22,7 @@ type AdminShellProps = {
 };
 
 /**
- * Estrutura fixa do painel: menu lateral, cabeçalho com título, "Ver site" e menu do usuário.
+ * Estrutura fixa do painel: menu lateral, cabeçalho com título, "Ver site", modo claro ou escuro e menu do usuário.
  * Desktop: menu completo. Tablet: menu recolhido em ícones. Celular: menu em gaveta.
  */
 export function AdminShell({ user, siteUrl, idleTimeoutMinutes, children }: AdminShellProps) {
@@ -107,6 +108,7 @@ export function AdminShell({ user, siteUrl, idleTimeoutMinutes, children }: Admi
               <span className={styles.siteLinkLabel}>Ver site</span>
               <span className="sr-only"> (abre em nova aba)</span>
             </a>
+            <ThemeToggle />
             <UserMenu user={user} />
           </div>
         </header>

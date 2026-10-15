@@ -32,25 +32,25 @@
 }
 
 .info {
-  background: var(--info-50);
-  border-color: var(--info-200);
-  color: var(--info-700);
+  background: var(--color-info-soft);
+  border-color: var(--color-info-line);
+  color: var(--color-info-text);
 }
 
 .success {
-  background: var(--success-50);
-  border-color: var(--success-200);
-  color: var(--success-700);
+  background: var(--color-success-soft);
+  border-color: var(--color-success-line);
+  color: var(--color-success-text);
 }
 
 .warning {
-  background: var(--warning-50);
-  border-color: var(--warning-200);
-  color: var(--warning-700);
+  background: var(--color-warning-soft);
+  border-color: var(--color-warning-line);
+  color: var(--color-warning-text);
 }
 
 .error {
-  background: var(--danger-50);
-  border-color: var(--danger-200);
-  color: var(--danger-700);
+  background: var(--color-danger-soft);
+  border-color: var(--color-danger-line);
+  color: var(--color-danger-text);
 }

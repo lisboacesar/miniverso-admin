@@ -14,10 +14,13 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-2) var(--space-3) var(--space-4);
-  background: var(--gray-900);
+  background: var(--color-toast);
   color: #fff;
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
+  /* Contorno só no modo escuro, para o aviso não se misturar com o fundo */
+  box-shadow:
+    var(--shadow-lg),
+    inset 0 0 0 1px var(--color-floating-edge);
   pointer-events: auto;
   animation: enter 0.2s ease-out;
 }

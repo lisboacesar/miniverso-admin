@@ -4,7 +4,7 @@ Front-end do painel administrativo do portfólio institucional da Miniverso, em 
 Esta parte do projeto é o **editor da página inicial** (frame "Painel · Editor da página inicial" no Figma), onde o administrador muda a estrutura e o conteúdo da home do site, e a consulta de **leads** recebidos pelo formulário de contato (seção "Painel · Leads" no Figma).
 Projeto da disciplina Programação Avançada para Web (UNDB, Prof. Me. Kleydson Beckman).
 
-Versão atual: **0.3.0**. O histórico de entregas está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md) e as ideias fora do DRDA, em [docs/PROPOSTAS.md](docs/PROPOSTAS.md).
+Versão atual: **0.4.0**. O histórico de entregas está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md) e as ideias fora do DRDA, em [docs/PROPOSTAS.md](docs/PROPOSTAS.md).
 
 ## O que já funciona
 
@@ -21,6 +21,7 @@ Versão atual: **0.3.0**. O histórico de entregas está em [docs/EVOLUCAO.md](d
   - lista com busca por nome, e-mail ou empresa, filtro por serviço de interesse, ordenação por data e paginação
   - detalhe com a mensagem completa, responder por e-mail e copiar o contato
   - exclusão com confirmação que nomeia o lead
+- Modo claro e escuro em todas as telas: botão no cabeçalho, ao lado de "Ver site". Na primeira visita segue o tema do sistema; depois a escolha fica salva no navegador
 
 ## Como rodar
 
@@ -122,6 +123,7 @@ src/
 | Remoção sempre com modal que nomeia o item | evita apagar algo por engano | RNF42 |
 | Serviço de interesse ligado à seção Serviços | o filtro de leads e o formulário do site usam a mesma lista | RF06, RF16, RNF28 |
 | Imagem de fundo decorativa, sem texto alternativo | o RNF34 vale para imagens relevantes; a página pública aplica uma camada para o texto manter o contraste | RF15, RNF33, RNF34 |
+| Modo escuro por papéis de cor e cookie | os componentes usam papéis (`--color-*`) e o modo escuro troca só os papéis; o servidor lê o cookie e já entrega a página no tema certo, sem piscar | RNF28, RNF33, RNF41 |
 | `<dialog>` nativo, rótulos visíveis e foco visível | acessibilidade sem biblioteca extra | RNF35, RNF36 |
 | Mock no formato do Laravel | o painel evolui em paralelo com o back-end | 2.5 (desenvolvimento incremental) |
 
@@ -129,6 +131,7 @@ src/
 
 - Cores e fontes das variáveis do Figma (Miniverso · Tokens): fundo `#05060A`, azul `#2450E6`, hover `#1233A8`, Inter no texto e Sofia Sans Extra Condensed nos títulos, carregadas com `next/font`. Os pares de texto e fundo têm o contraste anotado em `src/app/globals.css` (RNF33).
 - Logo oficial em `public/brand/logo-branca-horizontal.svg`, exportado do Figma. É a versão branca, por isso o menu lateral e a lateral do login têm fundo escuro.
+- Modo escuro: valores em `src/app/globals.css`, nos blocos `:root[data-theme="dark"]` (escolha salva) e `prefers-color-scheme: dark` (tema do sistema). No Figma, as mesmas cores estão na coleção de variáveis "Painel · Cores", com os modos Claro e Escuro.
 
 ## Testes
 
@@ -136,4 +139,4 @@ src/
 npm test
 ```
 
-Cobrem as regras do editor (obrigatórios, limites, ordem das seções, Clientes, Experiência, projeto em destaque, arquivos, imagem de fundo), os leads (busca, filtro, ordem, exclusão, acesso sem token), o mock da API, os redirecionamentos seguros e as rotas do BFF: cookie httpOnly, mensagem genérica de login, bloqueio por tentativas, recusa de chamadas de outros sites e de caminhos fora da lista permitida.
+Cobrem as regras do editor (obrigatórios, limites, ordem das seções, Clientes, Experiência, projeto em destaque, arquivos, imagem de fundo), os leads (busca, filtro, ordem, exclusão, acesso sem token), o tema (cookie, sistema e alternância), os tokens de cor (contraste mínimo nos dois temas e nenhuma cor fixa nos componentes), o mock da API, os redirecionamentos seguros e as rotas do BFF: cookie httpOnly, mensagem genérica de login, bloqueio por tentativas, recusa de chamadas de outros sites e de caminhos fora da lista permitida.

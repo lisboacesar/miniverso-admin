@@ -45,40 +45,40 @@
 
 .secondary {
   background: var(--color-surface);
-  color: var(--color-primary);
+  color: var(--color-accent);
   border-color: var(--color-border-strong);
 }
 
 .secondary:hover {
-  background: var(--mv-blue-50);
-  border-color: var(--color-primary);
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
 }
 
 .ghost {
   background: transparent;
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 .ghost:hover {
-  background: var(--mv-blue-50);
+  background: var(--color-accent-soft);
 }
 
 .danger {
-  background: var(--danger-700);
+  background: var(--color-danger-fill);
   color: #fff;
 }
 
 .danger:hover {
-  background: var(--danger-800);
+  background: var(--color-danger-fill-hover);
 }
 
 .danger-ghost {
   background: transparent;
-  color: var(--danger-700);
+  color: var(--color-danger-text);
 }
 
 .danger-ghost:hover {
-  background: var(--danger-50);
+  background: var(--color-danger-soft);
 }
 
 .button:disabled {

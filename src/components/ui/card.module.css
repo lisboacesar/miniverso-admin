@@ -28,7 +28,7 @@
 .title {
   font-size: var(--text-lg);
   font-weight: 700;
-  color: var(--mv-indigo-900);
+  color: var(--color-heading);
 }
 
 .description {

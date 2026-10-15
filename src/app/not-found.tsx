@@ -12,7 +12,7 @@ export default function NotFound() {
         </span>
         <h1 className={styles.title}>Página não encontrada</h1>
         <p className={styles.text}>O endereço pode estar errado ou a página foi removida.</p>
-        <ButtonLink href={ADMIN_HOME}>Ir para a visão geral</ButtonLink>
+        <ButtonLink href={ADMIN_HOME}>Ir para o painel</ButtonLink>
       </div>
     </main>
   );

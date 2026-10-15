@@ -5,11 +5,14 @@
   border-radius: var(--radius-lg);
   background: var(--color-surface);
   color: var(--color-text);
-  box-shadow: var(--shadow-lg);
+  /* Contorno só no modo escuro, para o modal se destacar do fundo */
+  box-shadow:
+    var(--shadow-lg),
+    inset 0 0 0 1px var(--color-floating-edge);
 }
 
 .dialog::backdrop {
-  background: rgb(30 22 69 / 0.55);
+  background: var(--color-overlay);
 }
 
 .inner {
@@ -24,8 +27,8 @@
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: var(--danger-50);
-  color: var(--danger-700);
+  background: var(--color-danger-soft);
+  color: var(--color-danger-text);
 }
 
 .icon svg {
@@ -36,7 +39,7 @@
 .title {
   font-size: var(--text-xl);
   font-weight: 700;
-  color: var(--mv-indigo-900);
+  color: var(--color-heading);
 }
 
 .description {

@@ -12,7 +12,7 @@
   padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-weight: 600;
   box-shadow: var(--shadow-md);
 }
@@ -31,6 +31,8 @@
   gap: var(--space-8);
   padding: var(--space-6) var(--space-4);
   background: var(--mv-indigo-900);
+  /* No modo escuro, uma linha separa o menu do conteúdo, que também fica escuro */
+  box-shadow: inset -1px 0 0 var(--color-sidebar-edge);
   color: rgb(255 255 255 / 0.72);
   overflow-y: auto;
 }
@@ -169,7 +171,7 @@
   font-family: var(--font-display);
   font-size: var(--text-xl);
   font-weight: 700;
-  color: var(--mv-indigo-900);
+  color: var(--color-heading);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -187,14 +189,14 @@
   min-height: 44px;
   padding: 0 var(--space-4);
   border-radius: var(--radius-pill);
-  color: var(--color-primary);
+  color: var(--color-accent);
   font-size: var(--text-sm);
   font-weight: 600;
   text-decoration: none;
 }
 
 .siteLink:hover {
-  background: var(--mv-blue-50);
+  background: var(--color-accent-soft);
 }
 
 .siteLink svg {
@@ -325,12 +327,17 @@
     position: fixed;
     inset: 0;
     z-index: 40;
-    background: rgb(30 22 69 / 0.55);
+    background: var(--color-overlay);
   }
 
+  /* Espaço menor entre os botões para o título caber com os três atalhos (Ver site, tema e conta) */
   .header {
-    gap: var(--space-2);
+    gap: var(--space-1);
     padding: var(--space-2) var(--space-3);
+  }
+
+  .headerActions {
+    gap: var(--space-1);
   }
 
   .menuButton {
@@ -342,7 +349,7 @@
     border: 0;
     border-radius: var(--radius-md);
     background: transparent;
-    color: var(--mv-indigo-900);
+    color: var(--color-heading);
     cursor: pointer;
   }
 

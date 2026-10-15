@@ -45,7 +45,7 @@ Enquanto isso, com um único administrador (2.2), a senha pode ser trocada pela 
 - o contraste mínimo de 4,5:1 (RNF33), que qualquer combinação livre de cores pode quebrar;
 - o administrador sem conhecimento técnico (RNF41).
 
-**O que já está no painel.** Textos e imagens de todas as seções (RF15), imagem de fundo opcional por seção (v0.3.0), visibilidade das seções opcionais (3.1.1) e ordem das seções do meio (decisão da equipe, a validar com o cliente).
+**O que já está no painel.** Textos e imagens de todas as seções (RF15), imagem de fundo opcional por seção (v0.3.0), modo claro e escuro escolhido no cabeçalho (v0.4.0), visibilidade das seções opcionais (3.1.1) e ordem das seções do meio (decisão da equipe, a validar com o cliente). O modo escuro não depende desta proposta: troca só os papéis de cor, sem mudar a identidade.
 
 **O que propomos, se o cliente aprovar.**
 

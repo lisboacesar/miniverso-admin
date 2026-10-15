@@ -4,6 +4,8 @@
  * Contraste conferido para RNF33 (valores em comentário: texto sobre o fundo indicado).
  */
 :root {
+  color-scheme: light;
+
   /* Marca: tokens "Miniverso · Tokens" do Figma (página 01 · Fundações & componentes) */
   --mv-ink: #05060a; /* cor/fundo/base; branco sobre ele: 20,3:1 */
   --mv-indigo-900: #0b0e16; /* cor/fundo/elevado: menu lateral e títulos */
@@ -37,16 +39,48 @@
   --info-50: #eef3ff;
   --info-200: #c9d6ff;
 
-  /* Papéis */
-  --color-bg: var(--gray-25);
-  --color-surface: var(--gray-0);
+  /*
+   * Papéis: os componentes usam só estes nomes, nunca as cores acima direto.
+   * O modo escuro troca os papéis (blocos no fim da seção de tokens); as cores da marca continuam as mesmas.
+   */
+  --color-bg: var(--gray-25); /* fundo da página */
+  --color-surface: var(--gray-0); /* cartões, cabeçalho, campos e modais */
+  --color-surface-subtle: var(--gray-25); /* áreas internas: cabeçalho de tabela, mensagem, envio de arquivo */
+  --color-fill: var(--gray-50); /* etiquetas neutras, trilho do switch, hover de botões sem fundo */
+  --color-fill-strong: var(--gray-100); /* brilho do esqueleto de carregamento */
   --color-text: var(--gray-900);
+  --color-heading: var(--mv-indigo-900); /* títulos */
   --color-text-muted: var(--gray-600);
+  --color-text-subtle: var(--gray-500); /* placeholder e ícones de apoio */
   --color-border: var(--gray-100);
-  --color-border-strong: var(--gray-400);
-  --color-primary: var(--mv-blue-700);
+  --color-border-strong: var(--gray-400); /* borda de campo */
+  --color-border-hover: var(--gray-600);
+  --color-primary: var(--mv-blue-700); /* fundo de botão, switch ligado e checkbox */
   --color-primary-hover: var(--mv-blue-800);
+  --color-accent: var(--mv-blue-700); /* links, textos, ícones e bordas em azul */
+  --color-accent-soft: var(--mv-blue-50); /* fundo azul claro de etiquetas e itens ativos */
   --color-focus: var(--mv-blue-700);
+  --color-info-text: var(--info-700);
+  --color-info-soft: var(--info-50);
+  --color-info-line: var(--info-200);
+  --color-success-text: var(--success-700);
+  --color-success-soft: var(--success-50);
+  --color-success-line: var(--success-200);
+  --color-warning-text: var(--warning-700);
+  --color-warning-soft: var(--warning-50);
+  --color-warning-line: var(--warning-200);
+  --color-danger-text: var(--danger-700); /* texto, ícone e borda de erro */
+  --color-danger-soft: var(--danger-50);
+  --color-danger-line: var(--danger-200);
+  --color-danger-fill: var(--danger-700); /* fundo do botão de exclusão, com texto branco */
+  --color-danger-fill-hover: var(--danger-800);
+  --color-avatar: var(--mv-indigo-900);
+  --color-switch-thumb: var(--gray-500);
+  --color-toast: var(--gray-900);
+  --color-floating-edge: transparent; /* contorno de modais e avisos flutuantes */
+  --color-sidebar-edge: transparent; /* linha entre o menu lateral e o conteúdo */
+  --color-overlay: rgb(30 22 69 / 0.55); /* fundo atrás de modais e do menu no celular */
+  --color-overlay-strong: rgb(5 6 10 / 0.6); /* fundo atrás de formulários em modal e painel lateral */
 
   /* Tipografia do Figma: Inter no texto e Sofia Sans Extra Condensed nos títulos (carregadas em app/layout.tsx) */
   --font-sans: var(--font-inter, ui-sans-serif), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
@@ -83,6 +117,106 @@
   --sidebar-width: 248px;
   --sidebar-collapsed: 76px;
   --header-height: 64px;
+}
+
+/*
+ * Modo escuro.
+ * Vale quando o administrador escolhe "Modo escuro" no cabeçalho (cookie lido em app/layout.tsx)
+ * ou, sem escolha salva, quando o sistema do aparelho está no tema escuro.
+ * Só os papéis mudam; o menu lateral, a lateral do login e as cores da marca continuam iguais.
+ * Contraste sobre a superfície #131a2c (RNF33). Os dois blocos têm de ser iguais:
+ * theme-tokens.test.ts confere isso e o contraste de cada par nos dois temas.
+ */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #0b1020;
+  --color-surface: #131a2c;
+  --color-surface-subtle: #0e1424;
+  --color-fill: #1e2740;
+  --color-fill-strong: #29334d;
+  --color-text: #e6eaf4; /* 14,4:1 */
+  --color-heading: #f4f6fb; /* 16,0:1 */
+  --color-text-muted: #a4adc2; /* 7,7:1 */
+  --color-text-subtle: #8e98b0; /* 6,0:1 */
+  --color-border: #263049;
+  --color-border-strong: #6c7894; /* 3,9:1 */
+  --color-border-hover: #8d98b3;
+  --color-primary: #2450e6; /* texto branco sobre ele: 6,2:1 */
+  --color-primary-hover: #1233a8;
+  --color-accent: #8aa6ff; /* 7,4:1 */
+  --color-accent-soft: #1a2547;
+  --color-focus: #8aa6ff;
+  --color-info-text: #aebfff; /* 8,7:1 sobre o fundo do aviso */
+  --color-info-soft: #18223f;
+  --color-info-line: #34467f;
+  --color-success-text: #6fdc9d; /* 9,1:1 sobre o fundo do aviso */
+  --color-success-soft: #11291f;
+  --color-success-line: #23573d;
+  --color-warning-text: #f3c46b; /* 9,4:1 sobre o fundo do aviso */
+  --color-warning-soft: #2d2410;
+  --color-warning-line: #6b5323;
+  --color-danger-text: #ff8f85; /* 7,9:1; 7,0:1 sobre o fundo do aviso */
+  --color-danger-soft: #3b1a1d;
+  --color-danger-line: #6d2a2a;
+  --color-danger-fill: #b42318; /* texto branco sobre ele: 6,6:1 */
+  --color-danger-fill-hover: #912018;
+  --color-avatar: #2450e6;
+  --color-switch-thumb: #9aa4bb;
+  --color-toast: #232d47;
+  --color-floating-edge: rgb(255 255 255 / 0.12);
+  --color-sidebar-edge: rgb(255 255 255 / 0.08);
+  --color-overlay: rgb(2 4 12 / 0.72);
+  --color-overlay-strong: rgb(2 4 12 / 0.78);
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 8px 24px rgb(0 0 0 / 0.45);
+  --shadow-lg: 0 24px 48px rgb(0 0 0 / 0.6);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --color-bg: #0b1020;
+    --color-surface: #131a2c;
+    --color-surface-subtle: #0e1424;
+    --color-fill: #1e2740;
+    --color-fill-strong: #29334d;
+    --color-text: #e6eaf4; /* 14,4:1 */
+    --color-heading: #f4f6fb; /* 16,0:1 */
+    --color-text-muted: #a4adc2; /* 7,7:1 */
+    --color-text-subtle: #8e98b0; /* 6,0:1 */
+    --color-border: #263049;
+    --color-border-strong: #6c7894; /* 3,9:1 */
+    --color-border-hover: #8d98b3;
+    --color-primary: #2450e6; /* texto branco sobre ele: 6,2:1 */
+    --color-primary-hover: #1233a8;
+    --color-accent: #8aa6ff; /* 7,4:1 */
+    --color-accent-soft: #1a2547;
+    --color-focus: #8aa6ff;
+    --color-info-text: #aebfff; /* 8,7:1 sobre o fundo do aviso */
+    --color-info-soft: #18223f;
+    --color-info-line: #34467f;
+    --color-success-text: #6fdc9d; /* 9,1:1 sobre o fundo do aviso */
+    --color-success-soft: #11291f;
+    --color-success-line: #23573d;
+    --color-warning-text: #f3c46b; /* 9,4:1 sobre o fundo do aviso */
+    --color-warning-soft: #2d2410;
+    --color-warning-line: #6b5323;
+    --color-danger-text: #ff8f85; /* 7,9:1; 7,0:1 sobre o fundo do aviso */
+    --color-danger-soft: #3b1a1d;
+    --color-danger-line: #6d2a2a;
+    --color-danger-fill: #b42318; /* texto branco sobre ele: 6,6:1 */
+    --color-danger-fill-hover: #912018;
+    --color-avatar: #2450e6;
+    --color-switch-thumb: #9aa4bb;
+    --color-toast: #232d47;
+    --color-floating-edge: rgb(255 255 255 / 0.12);
+    --color-sidebar-edge: rgb(255 255 255 / 0.08);
+    --color-overlay: rgb(2 4 12 / 0.72);
+    --color-overlay-strong: rgb(2 4 12 / 0.78);
+    --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-md: 0 8px 24px rgb(0 0 0 / 0.45);
+    --shadow-lg: 0 24px 48px rgb(0 0 0 / 0.6);
+  }
 }
 
 *,
@@ -125,7 +259,7 @@ textarea {
 }
 
 a {
-  color: var(--color-primary);
+  color: var(--color-accent);
 }
 
 /* Foco sempre visível para quem navega pelo teclado (RNF35) */

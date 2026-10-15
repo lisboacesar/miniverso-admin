@@ -3,6 +3,24 @@
 Mudanças do painel administrativo, da mais recente para a mais antiga.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). O detalhamento de cada entrega, com capturas de tela, está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md).
 
+## [0.4.0] - 2026-10-15
+
+Modo escuro no painel e no Figma. Detalhes em [docs/EVOLUCAO.md](docs/EVOLUCAO.md).
+
+### Adicionado
+
+- Modo escuro em todas as telas, inclusive no login. O botão "Modo escuro" fica no cabeçalho, ao lado de "Ver site"; no tema escuro ele mostra "Modo claro". Abaixo de 1024 px aparece só o ícone, com área de toque de 44 px
+- Na primeira visita o painel segue o tema do sistema. Depois do clique, a escolha fica salva no navegador por um ano (cookie `miniverso_admin_theme`), e o servidor já entrega a página no tema certo
+- `src/lib/theme.ts` com as regras do tema e `src/components/layout/theme-toggle.tsx` no cabeçalho
+- Testes do tema e dos tokens de cor: os dois blocos do modo escuro são iguais, todo papel de cor tem valor no escuro, contraste mínimo nos dois temas (RNF33) e nenhum componente usa cor fixa (73 testes)
+
+### Alterado
+
+- Os componentes passaram a usar papéis de cor (`--color-*` em `globals.css`) no lugar das cores fixas, com os mesmos valores no tema claro. Conferido elemento por elemento: no claro, só o título dos formulários em modal mudou, de `#05060A` para a cor dos outros títulos (`#0B0E16`)
+- Modais, avisos, menu lateral e lateral do login ganham um contorno sutil no modo escuro
+- No celular, o espaço entre os botões do cabeçalho diminuiu para o título caber inteiro com o novo botão
+- Página não encontrada: o botão diz "Ir para o painel", porque a visão geral não existe mais
+
 ## [0.3.0] - 2026-10-15
 
 Revisão a partir dos comentários do João no Figma. A análise de cada comentário está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md#v030--15102026--revisão-dos-comentários-do-joão).
