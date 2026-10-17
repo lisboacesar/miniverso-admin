@@ -16,8 +16,19 @@ Cada entrega ganha uma entrada neste arquivo, com o que mudou, os requisitos do 
 | 0.3.0 | 15/10/2026 | Revisão dos comentários do João: leads, imagem de fundo e propostas | entregue com mock |
 | 0.4.0 | 15/10/2026 | Modo escuro no painel e no Figma | entregue com mock |
 | 0.4.1 | 15/10/2026 | Revisão completa: lint, acessibilidade e contraste no Figma | entregue com mock |
+| 0.4.2 | 17/10/2026 | Lint sem avisos e build sem alerta de raiz | entregue com mock |
 | 0.5.0 | a definir | Editor e leads ligados às rotas reais e envio de imagens | depende do back-end |
 | 0.6.0 | a definir | Ajustes finais, testes com pessoas de fora da equipe e publicação | planejada |
+
+---
+
+## v0.4.2 · 17/10/2026 · Lint e build limpos
+
+Resultado no computador da equipe depois da v0.4.1: `npm run lint` com 0 erros e 1 aviso, e `npm run build` concluído, com um alerta sobre outro `package-lock.json` fora do projeto.
+
+- O aviso era `jsx-a11y/role-supports-aria-props`: o botão "Escolher imagem" tinha `aria-invalid`, que botões não aceitam. Saiu; o erro continua ligado por `aria-describedby` e é anunciado ao aparecer (RNF30).
+- `turbopack.root` no `next.config.ts` aponta para a pasta do projeto, então o build não procura arquivos fora dela.
+- `npm test`: 73 testes passando.
 
 ---
 

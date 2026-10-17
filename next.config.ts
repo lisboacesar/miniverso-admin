@@ -17,6 +17,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // A raiz do projeto é esta pasta, mesmo que exista outro package-lock.json mais acima no computador.
+  turbopack: { root: process.cwd() },
   poweredByHeader: false,
   reactStrictMode: true,
   env: {

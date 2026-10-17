@@ -1,6 +1,6 @@
 {
   "name": "miniverso-admin",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "private": true,
   "description": "Painel administrativo do portfólio institucional da Miniverso (front-end em Next.js).",
   "scripts": {

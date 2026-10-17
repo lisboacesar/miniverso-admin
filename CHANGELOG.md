@@ -3,6 +3,13 @@
 Mudanças do painel administrativo, da mais recente para a mais antiga.
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). O detalhamento de cada entrega, com capturas de tela, está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md).
 
+## [0.4.2] - 2026-10-17
+
+### Corrigido
+
+- Único aviso do `npm run lint`: `aria-invalid` saiu do botão "Escolher imagem", que não aceita esse atributo. O erro continua ligado ao botão por `aria-describedby` e é anunciado ao aparecer
+- `next build` não avisa mais sobre outro `package-lock.json` fora do projeto: a raiz do Turbopack é a pasta do projeto
+
 ## [0.4.1] - 2026-10-15
 
 Revisão completa do painel, do código ao Figma. Detalhes e método em [docs/EVOLUCAO.md](docs/EVOLUCAO.md).

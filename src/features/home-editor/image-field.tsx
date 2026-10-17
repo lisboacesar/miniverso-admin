@@ -138,7 +138,6 @@ export function ImageField({ def, value, onChange, error, disabled }: ImageField
           onClick={() => inputRef.current?.click()}
           disabled={disabled || reading}
           aria-describedby={describedBy}
-          aria-invalid={shownError ? true : undefined}
         >
           <LuImagePlus aria-hidden="true" />
           <span>{reading ? "Carregando prévia..." : isModel ? "Escolher arquivo" : "Escolher imagem"}</span>

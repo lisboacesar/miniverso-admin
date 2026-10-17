@@ -4,7 +4,7 @@ Front-end do painel administrativo do portfólio institucional da Miniverso, em 
 Esta parte do projeto é o **editor da página inicial** (frame "Painel · Editor da página inicial" no Figma), onde o administrador muda a estrutura e o conteúdo da home do site, e a consulta de **leads** recebidos pelo formulário de contato (seção "Painel · Leads" no Figma).
 Projeto da disciplina Programação Avançada para Web (UNDB, Prof. Me. Kleydson Beckman).
 
-Versão atual: **0.4.1**. O histórico de entregas está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md) e as ideias fora do DRDA, em [docs/PROPOSTAS.md](docs/PROPOSTAS.md).
+Versão atual: **0.4.2**. O histórico de entregas está em [docs/EVOLUCAO.md](docs/EVOLUCAO.md) e as ideias fora do DRDA, em [docs/PROPOSTAS.md](docs/PROPOSTAS.md).
 
 ## O que já funciona
 
