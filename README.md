@@ -1,5 +1,7 @@
 # Painel administrativo Miniverso
 
+[![CI](https://github.com/lisboacesar/miniverso-admin/actions/workflows/ci.yml/badge.svg)](https://github.com/lisboacesar/miniverso-admin/actions/workflows/ci.yml)
+
 Front-end do painel administrativo do portfólio institucional da Miniverso, em **Next.js 16** e **React 19**.
 Esta parte do projeto é o **editor da página inicial** (frame "Painel · Editor da página inicial" no Figma), onde o administrador muda a estrutura e o conteúdo da home do site, e a consulta de **leads** recebidos pelo formulário de contato (seção "Painel · Leads" no Figma).
 Projeto da disciplina Programação Avançada para Web (UNDB, Prof. Me. Kleydson Beckman).
